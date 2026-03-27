@@ -1,60 +1,109 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import { WikiArticle } from "@/types/wiki";
 import WikiReel from "./WikiReel";
+import SkeletonReel from "./SkeletonReel";
 
-export default function ReelFeed() {
+const DOM_CAP = 40;      // max articles in DOM at once
+const TRIM_BATCH = 5;    // how many to remove from front when capping
+const PREFETCH_AHEAD = 2; // prefetch when N articles from the end
+
+interface ReelFeedProps {
+  selectedCategory: string | null;
+  onActiveIndexChange?: (index: number) => void;
+}
+
+export default function ReelFeed({
+  selectedCategory,
+  onActiveIndexChange,
+}: ReelFeedProps) {
   const [articles, setArticles] = useState<WikiArticle[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [fetchingMore, setFetchingMore] = useState(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const activeIndexRef = useRef(0); // avoid stale closure in keydown handler
 
-  const fetchArticles = useCallback(async (count = 5) => {
+  // ─── Fetch helpers ──────────────────────────────────────────────
+
+  const fetchArticles = useCallback(async (count = 5): Promise<WikiArticle[]> => {
     try {
-      const res = await fetch(`/api/wiki?count=${count}`);
-      const data: WikiArticle[] = await res.json();
-      return data;
+      const param = selectedCategory
+        ? `&topic=${encodeURIComponent(selectedCategory)}`
+        : "";
+      const res = await fetch(`/api/wiki?count=${count}${param}`);
+      if (!res.ok) return [];
+      return res.json();
     } catch {
       return [];
     }
-  }, []);
+  }, [selectedCategory]);
 
-  // Initial load
+  // ─── Initial load / category change ────────────────────────────
+
   useEffect(() => {
+    setLoading(true);
+    setArticles([]);
+    setActiveIndex(0);
+    activeIndexRef.current = 0;
+    itemRefs.current = [];
+
     fetchArticles(5).then((data) => {
       setArticles(data);
       setLoading(false);
     });
-  }, [fetchArticles]);
+  }, [fetchArticles]); // selectedCategory is captured in fetchArticles
 
-  // Prefetch more when near the end
+  // ─── Prefetch + DOM cap ─────────────────────────────────────────
+
   useEffect(() => {
-    if (articles.length === 0) return;
-    if (activeIndex >= articles.length - 2 && !fetchingMore) {
-      setFetchingMore(true);
-      fetchArticles(5).then((more) => {
-        setArticles((prev) => [...prev, ...more]);
-        setFetchingMore(false);
+    if (articles.length === 0 || fetchingMore) return;
+    if (activeIndex < articles.length - PREFETCH_AHEAD) return;
+
+    setFetchingMore(true);
+    fetchArticles(5).then((more) => {
+      setArticles((prev) => {
+        const combined = [...prev, ...more];
+        if (combined.length <= DOM_CAP) {
+          return combined;
+        }
+        // Trim oldest articles from front, keep activeIndex in sync
+        const trimmed = combined.slice(TRIM_BATCH);
+        setActiveIndex((ai) => Math.max(0, ai - TRIM_BATCH));
+        activeIndexRef.current = Math.max(0, activeIndexRef.current - TRIM_BATCH);
+        itemRefs.current = itemRefs.current.slice(TRIM_BATCH);
+        return trimmed;
       });
-    }
+      setFetchingMore(false);
+    });
   }, [activeIndex, articles.length, fetchingMore, fetchArticles]);
 
-  // Intersection observer to track active reel
+  // ─── Intersection observer ──────────────────────────────────────
+
   useEffect(() => {
     if (observerRef.current) observerRef.current.disconnect();
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        for (const entry of entries) {
           if (entry.isIntersecting) {
-            const index = itemRefs.current.indexOf(entry.target as HTMLDivElement);
-            if (index !== -1) setActiveIndex(index);
+            const idx = itemRefs.current.indexOf(entry.target as HTMLDivElement);
+            if (idx !== -1) {
+              setActiveIndex(idx);
+              activeIndexRef.current = idx;
+              onActiveIndexChange?.(idx);
+            }
           }
-        });
+        }
       },
       { threshold: 0.6 }
     );
@@ -64,15 +113,39 @@ export default function ReelFeed() {
     });
 
     return () => observerRef.current?.disconnect();
-  }, [articles]);
+  }, [articles, onActiveIndexChange]);
+
+  // ─── Keyboard navigation ────────────────────────────────────────
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+
+      if (e.key === "ArrowDown" || e.key === "j") {
+        e.preventDefault();
+        itemRefs.current[activeIndexRef.current + 1]?.scrollIntoView({
+          behavior: "smooth",
+        });
+      }
+      if (e.key === "ArrowUp" || e.key === "k") {
+        e.preventDefault();
+        itemRefs.current[activeIndexRef.current - 1]?.scrollIntoView({
+          behavior: "smooth",
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  // ─── Render ─────────────────────────────────────────────────────
 
   if (loading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-black">
-        <div className="flex flex-col items-center gap-4 text-white/60">
-          <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          <span className="text-sm">Loading articles…</span>
-        </div>
+      <div className="h-screen w-full overflow-hidden">
+        <SkeletonReel />
       </div>
     );
   }
@@ -80,24 +153,34 @@ export default function ReelFeed() {
   return (
     <div
       ref={containerRef}
-      className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
-      style={{ scrollbarWidth: "none" }}
+      className="h-screen overflow-y-scroll snap-y snap-mandatory scrollbar-none"
     >
-      <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-
       {articles.map((article, i) => (
         <div
           key={`${article.id}-${i}`}
-          ref={(el) => { itemRefs.current[i] = el; }}
+          ref={(el) => {
+            itemRefs.current[i] = el;
+          }}
           className="snap-start snap-always h-screen w-full"
         >
           <WikiReel article={article} isActive={i === activeIndex} />
         </div>
       ))}
 
+      {/* Loading more indicator */}
       {fetchingMore && (
-        <div className="h-screen w-full flex items-center justify-center bg-black snap-start">
-          <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        <div
+          className="snap-start snap-always h-screen w-full flex items-center justify-center"
+          style={{ background: "var(--surface-0)" }}
+        >
+          <div
+            className="w-6 h-6 rounded-full border-2"
+            style={{
+              borderColor: "var(--border)",
+              borderTopColor: "var(--accent)",
+              animation: "spin 0.8s linear infinite",
+            }}
+          />
         </div>
       )}
     </div>

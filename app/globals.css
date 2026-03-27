@@ -1,26 +1,116 @@
 @import "tailwindcss";
 
+/* ─── Base ────────────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  /* Typography */
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+
+  /* Surfaces */
+  --surface-0: #080808;
+  --surface-1: #111111;
+  --surface-2: #1a1a1a;
+  --surface-3: #252525;
+
+  /* Text */
+  --text-primary:   rgba(255,255,255,0.95);
+  --text-secondary: rgba(255,255,255,0.60);
+  --text-tertiary:  rgba(255,255,255,0.35);
+
+  /* Accent — electric violet */
+  --accent:        #7C5CFC;
+  --accent-light:  #9B84FD;
+  --accent-dim:    rgba(124,92,252,0.18);
+  --accent-border: rgba(124,92,252,0.45);
+
+  /* Streak — amber */
+  --streak:     #F5A623;
+  --streak-dim: rgba(245,166,35,0.16);
+
+  /* Structural */
+  --border:        rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.16);
 }
 
+/* Expose tokens to Tailwind utilities */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-heading);
+  --font-body:    var(--font-body);
+
+  --color-surface-0:    var(--surface-0);
+  --color-surface-1:    var(--surface-1);
+  --color-surface-2:    var(--surface-2);
+  --color-surface-3:    var(--surface-3);
+
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary:  var(--text-tertiary);
+
+  --color-accent:        var(--accent);
+  --color-accent-light:  var(--accent-light);
+  --color-accent-dim:    var(--accent-dim);
+  --color-accent-border: var(--accent-border);
+
+  --color-streak:     var(--streak);
+  --color-streak-dim: var(--streak-dim);
+
+  --color-border:        var(--border);
+  --color-border-strong: var(--border-strong);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body {
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ─── Animations ─────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Utilities ──────────────────────────────────────────────── */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.animate-fadeUp {
+  animation: fadeUp 0.3s ease-out both;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--surface-3) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite linear;
 }
