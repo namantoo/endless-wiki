@@ -4,6 +4,18 @@ import { colorSeedFromTitle } from "@/lib/config/gradients";
 const REST_API    = "https://en.wikipedia.org/api/rest_v1";
 const ACTION_API  = "https://en.wikipedia.org/w/api.php";
 
+// Strip HTML tags and decode common entities from Wikipedia display titles
+function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim();
+}
+
 // Categories to strip — maintenance/administrative, not meaningful to users
 const MAINTENANCE_PATTERN =
   /^(Articles|Pages|CS1|Use |Coordinates|All |Wikipedia|Webarchive|Short |Good |Featured |Spoken )/i;
@@ -98,27 +110,12 @@ async function fetchCategoriesAndLinks(
   }
 }
 
-async function buildRelatedTopics(
-  linkTitles: string[]
-): Promise<RelatedTopic[]> {
-  if (linkTitles.length === 0) return [];
-
-  const results = await Promise.allSettled(
-    linkTitles.slice(0, 4).map((t) => fetchSummary(t))
-  );
-
-  const topics: RelatedTopic[] = [];
-  for (const r of results) {
-    if (r.status === "fulfilled" && r.value && r.value.type !== "disambiguation") {
-      topics.push({
-        title: r.value.title,
-        pageUrl:
-          r.value.content_urls?.desktop?.page ??
-          `https://en.wikipedia.org/wiki/${encodeURIComponent(r.value.title)}`,
-      });
-    }
-  }
-  return topics.slice(0, 4);
+// Build related topics directly from link titles — no extra API calls needed
+function buildRelatedTopics(linkTitles: string[]): RelatedTopic[] {
+  return linkTitles.slice(0, 4).map((t) => ({
+    title: t,
+    pageUrl: `https://en.wikipedia.org/wiki/${encodeURIComponent(t)}`,
+  }));
 }
 
 async function enrichArticle(title: string): Promise<WikiArticle | null> {
@@ -132,12 +129,12 @@ async function enrichArticle(title: string): Promise<WikiArticle | null> {
   }
 
   const { preview, full } = trimExtract(summary.extract);
-  const relatedTopics = await buildRelatedTopics(links);
+  const relatedTopics = buildRelatedTopics(links);
 
   return {
     id: summary.pageid,
     title: summary.title,
-    displayTitle: summary.displaytitle ?? summary.title,
+    displayTitle: stripHtml(summary.displaytitle ?? summary.title),
     extract: preview,
     extractFull: full,
     description: summary.description,

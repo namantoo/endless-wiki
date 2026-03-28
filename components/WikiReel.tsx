@@ -118,10 +118,12 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
 
       {/* ── Content ────────────────────────────────────────────── */}
       <div
-        className="relative z-10 animate-fadeUp"
+        className="relative z-10 animate-fadeUp scrollbar-none"
         style={{
           padding: "0 24px",
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 28px)",
+          maxHeight: "72vh",
+          overflowY: "auto",
         }}
       >
         {/* Category chip */}
@@ -224,7 +226,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
         {article.relatedTopics.length > 0 && (
           <div
             className="flex gap-2 scrollbar-none"
-            style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"] }}
+            style={{ overflowX: "auto" }}
           >
             {article.relatedTopics.map((topic) => (
               <a
