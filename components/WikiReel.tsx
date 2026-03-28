@@ -188,7 +188,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
               maxHeight: expanded ? "60vh" : undefined,
               overflowY: expanded ? "auto" : undefined,
               display: expanded ? "block" : "-webkit-box",
-              WebkitLineClamp: expanded ? undefined : 5,
+              WebkitLineClamp: expanded ? undefined : 3,
               WebkitBoxOrient: expanded ? undefined : "vertical",
               overflow: expanded ? "auto" : "hidden",
               scrollbarWidth: "none",

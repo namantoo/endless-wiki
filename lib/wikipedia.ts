@@ -1,24 +1,25 @@
 import { WikiArticle, RelatedTopic } from "@/types/wiki";
 import { colorSeedFromTitle } from "@/lib/config/gradients";
 
-const REST_API    = "https://en.wikipedia.org/api/rest_v1";
-const ACTION_API  = "https://en.wikipedia.org/w/api.php";
+const REST_API   = "https://en.wikipedia.org/api/rest_v1";
+const ACTION_API = "https://en.wikipedia.org/w/api.php";
 
-// Strip HTML tags and decode common entities from Wikipedia display titles
+// Strip HTML tags and decode all HTML entities from Wikipedia display titles
 function stripHtml(html: string): string {
   return html
     .replace(/<[^>]+>/g, "")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
     .trim();
 }
 
-// Categories to strip — maintenance/administrative, not meaningful to users
+// Filter out maintenance/administrative categories — anything not meaningful to readers
 const MAINTENANCE_PATTERN =
-  /^(Articles|Pages|CS1|Use |Coordinates|All |Wikipedia|Webarchive|Short |Good |Featured |Spoken )/i;
+  /stubs?$|^(Articles|Pages|CS1|Use |Coordinates|All |Wikipedia|Webarchive|Short |Good |Featured |Spoken |Harv and Sfn|Cleanup|Orphaned|Disputed|Accuracy|Bias|Dead|External links|Living people)/i;
 
 // ─── Extract trimming ─────────────────────────────────────────────
 
@@ -30,9 +31,8 @@ function trimExtract(
   const words = full.split(/\s+/);
   if (words.length <= targetWords) return { preview: full, full };
 
-  // Find a sentence boundary near the target word count
   const rough = words.slice(0, targetWords + 20).join(" ");
-  const cutoff = targetWords * 6; // ~6 chars per word average
+  const cutoff = targetWords * 6;
   const sentenceEnd = rough.lastIndexOf(". ", cutoff);
   const preview =
     sentenceEnd > 0
@@ -40,6 +40,16 @@ function trimExtract(
       : words.slice(0, targetWords).join(" ") + "…";
 
   return { preview, full };
+}
+
+// Fisher-Yates shuffle — used for category randomness
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 // ─── Single article enrichment ────────────────────────────────────
@@ -102,7 +112,7 @@ async function fetchCategoriesAndLinks(
     const links = (page?.links ?? [])
       .filter((l) => l.ns === 0)
       .map((l) => l.title)
-      .slice(0, 6); // fetch a few extra in case some fail
+      .slice(0, 6);
 
     return { categories, links };
   } catch {
@@ -110,7 +120,7 @@ async function fetchCategoriesAndLinks(
   }
 }
 
-// Build related topics directly from link titles — no extra API calls needed
+// Build related topics from link titles — no extra API calls needed
 function buildRelatedTopics(linkTitles: string[]): RelatedTopic[] {
   return linkTitles.slice(0, 4).map((t) => ({
     title: t,
@@ -155,11 +165,13 @@ async function enrichArticle(title: string): Promise<WikiArticle | null> {
 export async function getRandomArticles(
   count: number = 5
 ): Promise<WikiArticle[]> {
+  // Request extra to compensate for disambiguation/empty-extract rejections
+  const fetchCount = Math.min(count + 5, 20);
   const params = new URLSearchParams({
     action: "query",
     list: "random",
     rnnamespace: "0",
-    rnlimit: String(count),
+    rnlimit: String(fetchCount),
     format: "json",
     origin: "*",
   });
@@ -177,31 +189,38 @@ export async function getRandomArticles(
       (r): r is PromiseFulfilledResult<WikiArticle> =>
         r.status === "fulfilled" && r.value !== null
     )
-    .map((r) => r.value);
+    .map((r) => r.value)
+    .slice(0, count);
 }
 
-/** Fetch N articles from a specific Wikipedia category. */
+/** Fetch N articles from a specific Wikipedia category, randomly sampled. */
 export async function getArticlesByCategory(
   categorySlug: string,
   count: number = 5
 ): Promise<WikiArticle[]> {
+  // Fetch a larger pool so we can shuffle for variety each time
+  const poolSize = Math.min(count * 6, 50);
   const params = new URLSearchParams({
     action: "query",
     list: "categorymembers",
     cmtitle: `Category:${categorySlug}`,
     cmnamespace: "0",
-    cmlimit: String(count + 3), // fetch a few extra to account for failures
+    cmlimit: String(poolSize),
     cmsort: "timestamp",
-    cmdir: "desc",
+    // Alternate direction randomly so you don't always see newest/oldest
+    cmdir: Math.random() > 0.5 ? "desc" : "asc",
     format: "json",
     origin: "*",
   });
 
   const res = await fetch(`${ACTION_API}?${params}`);
   const data = await res.json();
-  const titles: string[] = (data?.query?.categorymembers ?? []).map(
+  const allTitles: string[] = (data?.query?.categorymembers ?? []).map(
     (p: { title: string }) => p.title
   );
+
+  // Shuffle so each load gives a different set of articles
+  const titles = shuffle(allTitles).slice(0, count + 5);
 
   const results = await Promise.allSettled(titles.map(enrichArticle));
 
