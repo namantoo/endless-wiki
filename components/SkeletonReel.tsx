@@ -5,8 +5,7 @@ export default function SkeletonReel() {
   return (
     <div
       className="w-full flex-shrink-0 flex flex-col justify-end"
-      style={{ height: "100dvh" }}
-      style={{ background: "var(--surface-1)" }}
+      style={{ height: "100dvh", background: "var(--surface-1)" }}
     >
       {/* Simulated gradient bottom area */}
       <div className="p-6 pb-16 space-y-3">
