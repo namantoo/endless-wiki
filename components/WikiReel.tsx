@@ -41,12 +41,13 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
   const hasMore = article.extractFull.length > article.extract.length;
 
   return (
+    // Single style prop — height + opacity merged to avoid duplicate-attribute error
     <div
-      className="relative w-full flex flex-col justify-end overflow-hidden"
-      style={{ height: "100dvh" }}
+      className="relative w-full overflow-hidden"
       style={{
-        transition: "opacity 0.4s ease",
+        height: "100dvh",
         opacity: isActive ? 1 : 0.45,
+        transition: "opacity 0.4s ease",
       }}
     >
       {/* ── Background ─────────────────────────────────────────── */}
@@ -59,14 +60,16 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
             className="object-cover"
             priority={isActive}
             sizes="100vw"
-            style={{ transition: "transform 0.6s ease", transform: isActive ? "scale(1)" : "scale(1.03)" }}
+            style={{
+              transition: "transform 0.6s ease",
+              transform: isActive ? "scale(1)" : "scale(1.03)",
+            }}
           />
-          {/* Multi-layer gradient for legibility */}
           <div
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.72) 22%, rgba(0,0,0,0.36) 52%, transparent 100%)",
+                "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.2) 60%, transparent 100%)",
             }}
           />
         </>
@@ -82,7 +85,6 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
         className="absolute right-4 flex flex-col gap-4"
         style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 140px)" }}
       >
-        {/* Bookmark */}
         <button
           onClick={handleBookmark}
           className="flex items-center justify-center transition-transform active:scale-90"
@@ -99,7 +101,6 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
           <BookmarkIcon filled={saved} />
         </button>
 
-        {/* Share */}
         <button
           onClick={handleShare}
           className="flex items-center justify-center transition-transform active:scale-90"
@@ -117,17 +118,17 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
         </button>
       </div>
 
-      {/* ── Content ────────────────────────────────────────────── */}
+      {/* ── Content — absolute bottom so it's always anchored to screen bottom */}
       <div
-        className="relative z-10 animate-fadeUp"
+        className="absolute left-0 right-0 bottom-0 animate-fadeUp"
         style={{
           padding: "0 20px",
-          paddingBottom: "calc(env(safe-area-inset-bottom, 16px) + 20px)",
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 28px)",
         }}
       >
         {/* Category chip */}
         {article.categories[0] && (
-          <div className="mb-3">
+          <div className="mb-2">
             <span
               className="font-heading font-semibold uppercase tracking-widest"
               style={{
@@ -145,7 +146,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
         <h1
           className="font-heading font-bold mb-1"
           style={{
-            fontSize: "clamp(26px, 5vw, 34px)",
+            fontSize: "clamp(24px, 5vw, 32px)",
             lineHeight: "1.1",
             letterSpacing: "-0.02em",
             color: "var(--text-primary)",
@@ -161,9 +162,9 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
         {/* Wikidata description */}
         {article.description && (
           <p
-            className="font-body mb-3"
+            className="font-body mb-2"
             style={{
-              fontSize: "14px",
+              fontSize: "13px",
               lineHeight: "1.3",
               color: "var(--text-secondary)",
               display: "-webkit-box",
@@ -176,45 +177,39 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
           </p>
         )}
 
-        {/* Extract body */}
-        <div className="mb-3">
+        {/* Extract */}
+        <div className="mb-2">
           <p
             className="font-body"
             style={{
-              fontSize: "15px",
-              lineHeight: "1.65",
+              fontSize: "14px",
+              lineHeight: "1.6",
               color: "var(--text-primary)",
-              maxHeight: expanded ? "60vh" : undefined,
-              overflowY: expanded ? "auto" : undefined,
               display: expanded ? "block" : "-webkit-box",
               WebkitLineClamp: expanded ? undefined : 3,
               WebkitBoxOrient: expanded ? undefined : "vertical",
-              overflow: expanded ? "auto" : "hidden",
-              scrollbarWidth: "none",
-              transition: "max-height 0.4s ease-out",
+              overflow: "hidden",
             }}
           >
             {expanded ? article.extractFull : article.extract}
           </p>
-
-          {/* Read more / Collapse toggle */}
           {hasMore && (
             <button
               onClick={() => setExpanded((e) => !e)}
               className="font-body font-medium mt-1 transition-opacity hover:opacity-70"
-              style={{ fontSize: "13px", color: "var(--accent-light)" }}
+              style={{ fontSize: "12px", color: "var(--accent-light)" }}
             >
               {expanded ? "Show less" : "Read more ›"}
             </button>
           )}
         </div>
 
-        {/* Read full article link */}
+        {/* Open in Wikipedia */}
         <a
           href={article.pageUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 font-heading font-semibold mb-4 transition-opacity hover:opacity-70"
+          className="inline-flex items-center gap-1.5 font-heading font-semibold mb-3 transition-opacity hover:opacity-70"
           style={{ fontSize: "12px", color: "var(--text-tertiary)" }}
         >
           Open in Wikipedia
@@ -223,10 +218,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
 
         {/* Related topic pills */}
         {article.relatedTopics.length > 0 && (
-          <div
-            className="flex gap-2 scrollbar-none"
-            style={{ overflowX: "auto" }}
-          >
+          <div className="flex gap-2 scrollbar-none" style={{ overflowX: "auto" }}>
             {article.relatedTopics.map((topic) => (
               <a
                 key={topic.title}
@@ -262,16 +254,10 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
 
 function BookmarkIcon({ filled }: { filled: boolean }) {
   return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
+    <svg width="18" height="18" viewBox="0 0 24 24"
       fill={filled ? "var(--accent)" : "none"}
       stroke={filled ? "var(--accent)" : "rgba(255,255,255,0.8)"}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
     </svg>
   );
@@ -279,16 +265,9 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
 
 function ShareIcon() {
   return (
-    <svg
-      width="17"
-      height="17"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="rgba(255,255,255,0.8)"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg width="17" height="17" viewBox="0 0 24 24"
+      fill="none" stroke="rgba(255,255,255,0.8)"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
       <polyline points="16 6 12 2 8 6" />
       <line x1="12" y1="2" x2="12" y2="15" />
@@ -298,16 +277,9 @@ function ShareIcon() {
 
 function ExternalIcon() {
   return (
-    <svg
-      width="11"
-      height="11"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg width="11" height="11" viewBox="0 0 24 24"
+      fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
       <polyline points="15 3 21 3 21 9" />
       <line x1="10" y1="14" x2="21" y2="3" />
