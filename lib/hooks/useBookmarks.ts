@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   getBookmarks,
   isBookmarked,
@@ -8,25 +8,22 @@ import {
   BookmarkItem,
 } from "@/lib/services/bookmarks";
 
-// Subscribe to localStorage changes so all components stay in sync
-function subscribe(cb: () => void): () => void {
-  if (typeof window === "undefined") return () => {};
-  window.addEventListener("storage", cb);
-  return () => window.removeEventListener("storage", cb);
-}
-
 export function useBookmarks() {
-  const bookmarks = useSyncExternalStore(
-    subscribe,
-    getBookmarks,
-    () => [] // server snapshot
-  );
+  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
+
+  useEffect(() => {
+    setBookmarks(getBookmarks());
+
+    const update = () => setBookmarks(getBookmarks());
+    window.addEventListener("storage", update);
+    return () => window.removeEventListener("storage", update);
+  }, []);
 
   const toggle = useCallback(
     (item: Omit<BookmarkItem, "savedAt">) => {
       toggleBookmark(item);
-      // Trigger re-render for same-tab subscribers
-      window.dispatchEvent(new Event("storage"));
+      setBookmarks(getBookmarks());
+      window.dispatchEvent(new Event("storage")); // notify other tabs
     },
     []
   );
