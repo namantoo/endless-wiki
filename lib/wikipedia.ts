@@ -4,6 +4,12 @@ import { colorSeedFromTitle } from "@/lib/config/gradients";
 const REST_API   = "https://en.wikipedia.org/api/rest_v1";
 const ACTION_API = "https://en.wikipedia.org/w/api.php";
 
+// Wikipedia API requires a descriptive User-Agent for production use
+const WP_HEADERS = {
+  "User-Agent": "EndlessWiki/1.0 (https://endless-wiki-scroll.vercel.app; namanmail4@gmail.com) next.js",
+  "Api-User-Agent": "EndlessWiki/1.0",
+};
+
 // Strip HTML tags and decode all HTML entities from Wikipedia display titles
 function stripHtml(html: string): string {
   return html
@@ -69,7 +75,7 @@ async function fetchSummary(title: string): Promise<RawSummary | null> {
   try {
     const res = await fetch(
       `${REST_API}/page/summary/${encodeURIComponent(title)}`,
-      { next: { revalidate: 3600 } }
+      { headers: WP_HEADERS, next: { revalidate: 3600 } }
     );
     if (!res.ok) return null;
     return res.json();
@@ -97,7 +103,7 @@ async function fetchCategoriesAndLinks(
       format: "json",
       origin: "*",
     });
-    const res = await fetch(`${ACTION_API}?${params}`);
+    const res = await fetch(`${ACTION_API}?${params}`, { headers: WP_HEADERS });
     if (!res.ok) return { categories: [], links: [] };
     const data = await res.json();
 
@@ -176,7 +182,7 @@ export async function getRandomArticles(
     origin: "*",
   });
 
-  const res = await fetch(`${ACTION_API}?${params}`);
+  const res = await fetch(`${ACTION_API}?${params}`, { headers: WP_HEADERS, cache: "no-store" });
   const data = await res.json();
   const titles: string[] = (data?.query?.random ?? []).map(
     (p: { title: string }) => p.title
@@ -198,7 +204,11 @@ export async function getArticlesByCategory(
   categorySlug: string,
   count: number = 5
 ): Promise<WikiArticle[]> {
-  // Fetch a larger pool so we can shuffle for variety each time
+  // Sort by sortkey (alphabetical) and jump to a random starting letter.
+  // This gives genuine variety across large categories — not always newest/oldest.
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const randomPrefix = alphabet[Math.floor(Math.random() * alphabet.length)];
+
   const poolSize = Math.min(count * 6, 50);
   const params = new URLSearchParams({
     action: "query",
@@ -206,20 +216,39 @@ export async function getArticlesByCategory(
     cmtitle: `Category:${categorySlug}`,
     cmnamespace: "0",
     cmlimit: String(poolSize),
-    cmsort: "timestamp",
-    // Alternate direction randomly so you don't always see newest/oldest
-    cmdir: Math.random() > 0.5 ? "desc" : "asc",
+    cmsort: "sortkey",
+    cmstartsortkeyprefix: randomPrefix,
     format: "json",
     origin: "*",
   });
 
-  const res = await fetch(`${ACTION_API}?${params}`);
+  const res = await fetch(`${ACTION_API}?${params}`, { headers: WP_HEADERS, cache: "no-store" });
   const data = await res.json();
-  const allTitles: string[] = (data?.query?.categorymembers ?? []).map(
+  let allTitles: string[] = (data?.query?.categorymembers ?? []).map(
     (p: { title: string }) => p.title
   );
 
-  // Shuffle so each load gives a different set of articles
+  // If the random letter had too few results, fall back to a timestamp-sorted fetch
+  if (allTitles.length < count) {
+    const fallbackParams = new URLSearchParams({
+      action: "query",
+      list: "categorymembers",
+      cmtitle: `Category:${categorySlug}`,
+      cmnamespace: "0",
+      cmlimit: String(poolSize),
+      cmsort: "timestamp",
+      cmdir: Math.random() > 0.5 ? "desc" : "asc",
+      format: "json",
+      origin: "*",
+    });
+    const fb = await fetch(`${ACTION_API}?${fallbackParams}`, { headers: WP_HEADERS, cache: "no-store" });
+    const fbData = await fb.json();
+    allTitles = (fbData?.query?.categorymembers ?? []).map(
+      (p: { title: string }) => p.title
+    );
+  }
+
+  // Shuffle so even within the same letter window, order varies
   const titles = shuffle(allTitles).slice(0, count + 5);
 
   const results = await Promise.allSettled(titles.map(enrichArticle));
