@@ -1,15 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Providers } from "./providers";
+import { APP_NAME, APP_TAGLINE } from "@/lib/config/tokens";
 import "./globals.css";
 
-// Fonts are loaded via Google Fonts CDN at runtime.
-// next/font/google requires build-time network access to Google Fonts,
-// which may be blocked in some environments. The CSS variable approach
-// (--font-heading, --font-body) declared in globals.css works universally.
-
 export const metadata: Metadata = {
-  title: "Weels",
-  description: "Spin through the world's knowledge. Endless Wikipedia discovery.",
+  title: APP_NAME,
+  description: APP_TAGLINE,
 };
 
 export const viewport: Viewport = {

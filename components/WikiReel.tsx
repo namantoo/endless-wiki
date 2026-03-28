@@ -54,7 +54,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
         transition: "opacity 0.35s ease",
       }}
     >
-      {/* ── Background ─────────────────────────────────────── */}
+      {/* ── Background ───────────────────────────────────────── */}
       {article.thumbnail ? (
         <>
           <Image
@@ -69,111 +69,102 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
               transform: isActive ? "scale(1)" : "scale(1.05)",
             }}
           />
-          {/* Gradient — lighter at top, heavier only near bottom */}
           <div
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to top, rgba(13,13,13,0.65) 0%, rgba(13,13,13,0.25) 40%, transparent 70%)",
+                "linear-gradient(to top, rgba(13,13,13,0.55) 0%, rgba(13,13,13,0.15) 45%, transparent 70%)",
             }}
           />
         </>
       ) : (
         <>
-          {/* Fallback gradient */}
-          <div
-            className="absolute inset-0"
-            style={{ background: getGradient(article.colorSeed) }}
-          />
-          {/* Dot texture overlay — adds depth on no-image cards */}
+          <div className="absolute inset-0" style={{ background: getGradient(article.colorSeed) }} />
+          {/* Dot texture on no-image cards */}
           <div
             className="absolute inset-0"
             style={{
-              backgroundImage:
-                "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
+              backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
               backgroundSize: "22px 22px",
             }}
           />
         </>
       )}
 
-      {/* ── Right action rail ──────────────────────────────── */}
-      <div
-        className="absolute right-4 flex flex-col gap-3"
-        style={{ top: "50%", transform: "translateY(-50%)" }}
-      >
-        <button
-          ref={bookmarkRef}
-          onClick={handleBookmark}
-          className="flex items-center justify-center active:scale-90 transition-transform"
-          style={{
-            width: "42px",
-            height: "42px",
-            borderRadius: "9999px",
-            background: saved
-              ? "var(--accent)"
-              : "rgba(13,13,13,0.55)",
-            backdropFilter: "blur(14px)",
-            WebkitBackdropFilter: "blur(14px)",
-            border: saved
-              ? "none"
-              : "1px solid rgba(255,255,255,0.14)",
-          }}
-          aria-label={saved ? "Remove bookmark" : "Bookmark article"}
-        >
-          <BookmarkIcon filled={saved} />
-        </button>
-
-        <button
-          onClick={handleShare}
-          className="flex items-center justify-center active:scale-90 transition-transform"
-          style={{
-            width: "42px",
-            height: "42px",
-            borderRadius: "9999px",
-            background: "rgba(13,13,13,0.55)",
-            backdropFilter: "blur(14px)",
-            WebkitBackdropFilter: "blur(14px)",
-            border: "1px solid rgba(255,255,255,0.14)",
-          }}
-          aria-label="Share article"
-        >
-          <ShareIcon />
-        </button>
-      </div>
-
-      {/* ── Content — frosted glass bottom-sheet panel ─────── */}
+      {/* ── Glass panel — content + actions all in one card ──── */}
       <div
         className="absolute left-0 right-0 bottom-0"
         style={{
-          background: "rgba(13,13,13,0.78)",
+          background: "rgba(13,13,13,0.80)",
           backdropFilter: "blur(28px)",
           WebkitBackdropFilter: "blur(28px)",
           borderRadius: "22px 22px 0 0",
           borderTop: "1px solid rgba(255,255,255,0.12)",
-          padding: "20px 22px",
-          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)",
+          padding: "18px 20px",
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 18px)",
         }}
       >
-        {/* Zone 1: Category chip — filled lime pill */}
-        <div className="animate-cardReveal" style={{ marginBottom: "10px" }}>
-          {article.categories[0] && (
-            <span
-              className="font-body font-bold uppercase"
+        {/* Zone 1: category chip (left) + bookmark/share (right) — same row */}
+        <div
+          className="animate-cardReveal flex items-center justify-between"
+          style={{ marginBottom: "10px" }}
+        >
+          {/* Category chip */}
+          <div>
+            {article.categories[0] ? (
+              <span
+                className="font-body font-bold uppercase"
+                style={{
+                  fontSize: "10px",
+                  letterSpacing: "0.09em",
+                  padding: "3px 10px",
+                  borderRadius: "9999px",
+                  background: "var(--accent)",
+                  color: "#0D0D0D",
+                  display: "inline-block",
+                  lineHeight: "1.6",
+                }}
+              >
+                {article.categories[0]}
+              </span>
+            ) : (
+              <span />
+            )}
+          </div>
+
+          {/* Bookmark + Share — inside the panel, top-right */}
+          <div className="flex items-center gap-2">
+            <button
+              ref={bookmarkRef}
+              onClick={handleBookmark}
+              className="flex items-center justify-center active:scale-90 transition-transform"
               style={{
-                fontSize: "10px",
-                letterSpacing: "0.09em",
-                padding: "3px 10px",
+                width: "36px",
+                height: "36px",
                 borderRadius: "9999px",
-                background: "var(--accent)",
-                color: "#0D0D0D",
-                display: "inline-block",
-                lineHeight: "1.6",
+                background: saved ? "var(--accent)" : "rgba(255,255,255,0.08)",
+                border: saved ? "none" : "1px solid rgba(255,255,255,0.14)",
               }}
+              aria-label={saved ? "Remove bookmark" : "Bookmark article"}
             >
-              {article.categories[0]}
-            </span>
-          )}
+              <BookmarkIcon filled={saved} />
+            </button>
+
+            <button
+              onClick={handleShare}
+              className="flex items-center justify-center active:scale-90 transition-transform"
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "9999px",
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.14)",
+              }}
+              aria-label="Share article"
+            >
+              <ShareIcon />
+            </button>
+          </div>
         </div>
 
         {/* Zone 2: Title + description + extract */}
@@ -231,12 +222,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
             <button
               onClick={() => setExpanded((e) => !e)}
               className="font-body font-semibold transition-opacity hover:opacity-70"
-              style={{
-                fontSize: "12px",
-                color: "var(--accent)",
-                marginTop: "4px",
-                display: "block",
-              }}
+              style={{ fontSize: "12px", color: "var(--accent)", marginTop: "4px", display: "block" }}
             >
               {expanded ? "Show less" : "Read more ›"}
             </button>
@@ -245,8 +231,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
 
         {/* Zone 3: Wikipedia link + related pills */}
         <div className="animate-cardReveal-d2" style={{ marginTop: "14px" }}>
-          <div className="flex items-center gap-3 flex-wrap">
-            {/* Wikipedia link — styled as an outlined pill */}
+          <div className="flex items-center gap-2 flex-wrap">
             <a
               href={article.pageUrl}
               target="_blank"
@@ -261,11 +246,9 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
                 whiteSpace: "nowrap",
               }}
             >
-              Wikipedia
-              <ArrowIcon />
+              Wikipedia <ArrowIcon />
             </a>
 
-            {/* Related topic pills */}
             {article.relatedTopics.map((topic) => (
               <a
                 key={topic.title}
@@ -301,7 +284,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
 
 function BookmarkIcon({ filled }: { filled: boolean }) {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24"
+    <svg width="16" height="16" viewBox="0 0 24 24"
       fill={filled ? "#0D0D0D" : "none"}
       stroke={filled ? "#0D0D0D" : "rgba(255,255,255,0.75)"}
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -312,7 +295,7 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
 
 function ShareIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24"
+    <svg width="15" height="15" viewBox="0 0 24 24"
       fill="none" stroke="rgba(255,255,255,0.75)"
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />

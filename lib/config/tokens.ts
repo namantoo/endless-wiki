@@ -1,4 +1,9 @@
 // ─────────────────────────────────────────────────────────────────
+// APP IDENTITY — Change the name here and it updates everywhere.
+export const APP_NAME = 'Wheels'
+export const APP_TAGLINE = "Spin through the world's knowledge. Endless Wikipedia discovery."
+
+// ─────────────────────────────────────────────────────────────────
 // DESIGN TOKENS — Single source of truth for all design decisions.
 //
 // To change a color:  edit COLOR.*

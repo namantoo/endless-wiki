@@ -2,6 +2,7 @@
 // Must be a class component — React error boundaries require lifecycle methods.
 
 import { Component, ReactNode, ErrorInfo } from "react";
+import { APP_NAME } from "@/lib/config/tokens";
 
 interface Props {
   children: ReactNode;
@@ -24,7 +25,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     // In V2 you might log to Sentry or your observability platform here
-    console.error("[Weels] Uncaught error:", error, info.componentStack);
+    console.error(`[${APP_NAME}] Uncaught error:`, error, info.componentStack);
   }
 
   handleRetry = () => {
@@ -49,7 +50,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               Something went wrong
             </p>
             <p style={{ fontSize: "14px" }}>
-              Weels hit an unexpected error. Tap below to try again.
+              {APP_NAME} hit an unexpected error. Tap below to try again.
             </p>
             {this.state.errorMessage && (
               <p style={{ fontSize: "11px", fontFamily: "monospace", opacity: 0.5, marginTop: "8px", wordBreak: "break-all" }}>
@@ -65,7 +66,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               padding: "10px 28px",
               borderRadius: "9999px",
               background: "var(--accent)",
-              color: "#fff",
+              color: "#0D0D0D",
             }}
           >
             Try again

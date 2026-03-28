@@ -1,8 +1,10 @@
 "use client";
 
-// TopBar — fixed overlay header.
-// Row 1: streak (left) · Weels wordmark (center) · today count (right)
-// Row 2: scrolling Wikipedia fact ticker strip (bored.com-inspired)
+import { useState } from "react";
+import { APP_NAME } from "@/lib/config/tokens";
+
+// Row 1: streak · wordmark · today count
+// Row 2: scrolling fact ticker (pause by hovering on desktop, pressing on mobile)
 
 const FACTS = [
   "Honey never expires — archaeologists found 3,000-year-old edible honey in Egyptian tombs",
@@ -23,6 +25,12 @@ interface TopBarProps {
 }
 
 export default function TopBar({ streak, todayCount }: TopBarProps) {
+  const [tickerPaused, setTickerPaused] = useState(false);
+
+  // Derive accent split from APP_NAME: last 2 chars in lime, rest normal
+  const nameMain   = APP_NAME.slice(0, -2);
+  const nameAccent = APP_NAME.slice(-2);
+
   return (
     <header
       className="fixed top-0 inset-x-0 z-50"
@@ -53,16 +61,12 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
           )}
         </div>
 
-        {/* Center: wordmark */}
+        {/* Center: wordmark — last 2 chars in accent color */}
         <span
           className="font-heading font-bold select-none"
-          style={{
-            fontSize: "19px",
-            color: "var(--text-primary)",
-            letterSpacing: "-0.03em",
-          }}
+          style={{ fontSize: "19px", color: "var(--text-primary)", letterSpacing: "-0.03em" }}
         >
-          Wee<span style={{ color: "var(--accent)" }}>ls</span>
+          {nameMain}<span style={{ color: "var(--accent)" }}>{nameAccent}</span>
         </span>
 
         {/* Right: today count */}
@@ -77,12 +81,7 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
               </span>
               <span
                 className="font-body font-semibold uppercase"
-                style={{
-                  fontSize: "8.5px",
-                  color: "var(--text-tertiary)",
-                  letterSpacing: "0.07em",
-                  marginTop: "1px",
-                }}
+                style={{ fontSize: "8.5px", color: "var(--text-tertiary)", letterSpacing: "0.07em", marginTop: "1px" }}
               >
                 today
               </span>
@@ -91,30 +90,29 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
         </div>
       </div>
 
-      {/* Row 2: scrolling fact ticker */}
+      {/* Row 2: fact ticker — pause on hover (desktop) or press (mobile) */}
       <div
-        style={{
-          overflow: "hidden",
-          background: "var(--accent)",
-          paddingTop: "5px",
-          paddingBottom: "5px",
-        }}
+        style={{ overflow: "hidden", background: "var(--accent)", paddingTop: "5px", paddingBottom: "5px", cursor: "pointer" }}
+        onMouseEnter={() => setTickerPaused(true)}
+        onMouseLeave={() => setTickerPaused(false)}
+        onTouchStart={() => setTickerPaused(true)}
+        onTouchEnd={() => setTickerPaused(false)}
+        onTouchCancel={() => setTickerPaused(false)}
+        title="Press and hold to pause"
       >
         <div
           className="animate-ticker"
-          style={{ display: "flex", gap: "0", width: "max-content" }}
+          style={{
+            display: "flex",
+            width: "max-content",
+            animationPlayState: tickerPaused ? "paused" : "running",
+          }}
         >
           {[...FACTS, ...FACTS].map((fact, i) => (
             <span
               key={i}
               className="font-body font-bold uppercase"
-              style={{
-                fontSize: "10px",
-                letterSpacing: "0.07em",
-                color: "#0D0D0D",
-                whiteSpace: "nowrap",
-                paddingRight: "48px",
-              }}
+              style={{ fontSize: "10px", letterSpacing: "0.07em", color: "#0D0D0D", whiteSpace: "nowrap", paddingRight: "48px" }}
             >
               ★ {fact}
             </span>
