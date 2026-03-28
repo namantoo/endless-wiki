@@ -4,7 +4,8 @@
 export default function SkeletonReel() {
   return (
     <div
-      className="h-screen w-full flex-shrink-0 flex flex-col justify-end"
+      className="w-full flex-shrink-0 flex flex-col justify-end"
+      style={{ height: "100dvh" }}
       style={{ background: "var(--surface-1)" }}
     >
       {/* Simulated gradient bottom area */}

@@ -24,8 +24,8 @@ export default function Home() {
 
   return (
     <main
-      className="relative h-screen overflow-hidden"
-      style={{ background: "var(--surface-0)" }}
+      className="relative overflow-hidden"
+      style={{ background: "var(--surface-0)", height: "100dvh" }}
     >
       <TopBar streak={streak} todayCount={todayCount} />
       <CategoryFilterBar
@@ -34,7 +34,7 @@ export default function Home() {
       />
 
       {/* Padding to account for fixed TopBar + CategoryFilterBar (~96px total) */}
-      <div className="h-full pt-[96px]" style={{ height: "100dvh" }}>
+      <div style={{ height: "100dvh", paddingTop: "96px" }}>
         <ErrorBoundary>
           <ReelFeed
             selectedCategory={selectedCategory}

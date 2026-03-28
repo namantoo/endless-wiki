@@ -42,7 +42,8 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
 
   return (
     <div
-      className="relative h-screen w-full flex flex-col justify-end overflow-hidden"
+      className="relative w-full flex flex-col justify-end overflow-hidden"
+      style={{ height: "100dvh" }}
       style={{
         transition: "opacity 0.4s ease",
         opacity: isActive ? 1 : 0.45,
@@ -118,12 +119,10 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
 
       {/* ── Content ────────────────────────────────────────────── */}
       <div
-        className="relative z-10 animate-fadeUp scrollbar-none"
+        className="relative z-10 animate-fadeUp"
         style={{
-          padding: "0 24px",
-          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 28px)",
-          maxHeight: "72vh",
-          overflowY: "auto",
+          padding: "0 20px",
+          paddingBottom: "calc(env(safe-area-inset-bottom, 16px) + 20px)",
         }}
       >
         {/* Category chip */}

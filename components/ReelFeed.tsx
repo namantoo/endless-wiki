@@ -144,7 +144,7 @@ export default function ReelFeed({
 
   if (loading) {
     return (
-      <div className="h-screen w-full overflow-hidden">
+      <div className="w-full overflow-hidden" style={{ height: "100dvh" }}>
         <SkeletonReel />
       </div>
     );
@@ -153,7 +153,8 @@ export default function ReelFeed({
   return (
     <div
       ref={containerRef}
-      className="h-screen overflow-y-scroll snap-y snap-mandatory scrollbar-none"
+      className="overflow-y-scroll snap-y snap-mandatory scrollbar-none"
+      style={{ height: "100dvh" }}
     >
       {articles.map((article, i) => (
         <div
@@ -161,7 +162,8 @@ export default function ReelFeed({
           ref={(el) => {
             itemRefs.current[i] = el;
           }}
-          className="snap-start snap-always h-screen w-full"
+          className="snap-start snap-always w-full"
+          style={{ height: "100dvh" }}
         >
           <WikiReel article={article} isActive={i === activeIndex} />
         </div>
@@ -170,8 +172,8 @@ export default function ReelFeed({
       {/* Loading more indicator */}
       {fetchingMore && (
         <div
-          className="snap-start snap-always h-screen w-full flex items-center justify-center"
-          style={{ background: "var(--surface-0)" }}
+          className="snap-start snap-always w-full flex items-center justify-center"
+          style={{ height: "100dvh", background: "var(--surface-0)" }}
         >
           <div
             className="w-6 h-6 rounded-full border-2"
