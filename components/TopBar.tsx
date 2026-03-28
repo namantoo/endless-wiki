@@ -1,23 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { APP_NAME } from "@/lib/config/tokens";
 
 // Row 1: streak · wordmark · today count
-// Row 2: scrolling fact ticker (pause by hovering on desktop, pressing on mobile)
+// Row 2: scrolling fact ticker — shuffled randomly on each page load
 
-const FACTS = [
-  "Honey never expires — archaeologists found 3,000-year-old edible honey in Egyptian tombs",
+// 30 facts — enough that one full scroll takes ~90s, so repeats are never noticeable
+const ALL_FACTS = [
+  "Honey never expires — 3,000-year-old honey found in Egyptian tombs was still edible",
   "A group of flamingos is called a flamboyance",
   "Cleopatra lived closer in time to the Moon landing than to the Great Pyramid's construction",
   "Sharks are older than trees — they've existed for over 400 million years",
-  "The word \"nerd\" was first coined by Dr. Seuss in 1950",
-  "Wombat poop is cube-shaped",
+  "The word 'nerd' was first coined by Dr. Seuss in 1950",
+  "Wombat poop is cube-shaped — the only known animal to produce cube-shaped waste",
   "The Eiffel Tower grows up to 15 cm taller in summer due to thermal expansion",
   "A day on Venus is longer than a year on Venus",
-  "Octopuses have three hearts and blue blood",
-  "The shortest war in history lasted 38 to 45 minutes",
+  "Octopuses have three hearts, nine brains, and blue blood",
+  "The shortest war in history lasted 38 to 45 minutes — Britain vs Zanzibar, 1896",
+  "There are more possible iterations of a chess game than atoms in the observable universe",
+  "A group of crows is called a murder",
+  "The average person walks the equivalent of five times around the Earth in their lifetime",
+  "Bananas are slightly radioactive due to naturally occurring potassium-40",
+  "Oxford University is older than the Aztec Empire",
+  "The dot over the letters 'i' and 'j' is called a tittle",
+  "Vending machines kill more people per year than sharks",
+  "The smell of rain on dry earth has a name — petrichor",
+  "Scotland's national animal is the unicorn",
+  "A group of owls is called a parliament",
+  "Humans share 50% of their DNA with bananas",
+  "The moon is moving away from Earth at approximately 3.8 cm per year",
+  "Nintendo was founded in 1889 — originally as a playing card company",
+  "There are more stars in the universe than grains of sand on all of Earth's beaches",
+  "Butterflies taste with their feet",
+  "The heart of a blue whale is so large a human could crawl through its arteries",
+  "It rains diamonds on Neptune and Uranus",
+  "A group of porcupines is called a prickle",
+  "The inventor of the frisbee was turned into a frisbee after he died — he requested it",
+  "Cleopatra's reign was closer to the invention of the iPhone than to the construction of the Great Pyramid",
 ];
+
+// Fisher-Yates shuffle
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 interface TopBarProps {
   streak: number;
@@ -27,7 +58,13 @@ interface TopBarProps {
 export default function TopBar({ streak, todayCount }: TopBarProps) {
   const [tickerPaused, setTickerPaused] = useState(false);
 
-  // Derive accent split from APP_NAME: last 2 chars in lime, rest normal
+  // Shuffle once on mount — random order every page load, no same sequence twice
+  // Duplicate the shuffled list for seamless CSS loop (second half = first half)
+  const facts = useMemo(() => {
+    const s = shuffle(ALL_FACTS);
+    return [...s, ...s];
+  }, []);
+
   const nameMain   = APP_NAME.slice(0, -2);
   const nameAccent = APP_NAME.slice(-2);
 
@@ -48,7 +85,6 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
           paddingBottom: "10px",
         }}
       >
-        {/* Left: streak */}
         <div className="w-20 flex items-center gap-1.5">
           {streak >= 1 && (
             <span
@@ -61,7 +97,6 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
           )}
         </div>
 
-        {/* Center: wordmark — last 2 chars in accent color */}
         <span
           className="font-heading font-bold select-none"
           style={{ fontSize: "19px", color: "var(--text-primary)", letterSpacing: "-0.03em" }}
@@ -69,7 +104,6 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
           {nameMain}<span style={{ color: "var(--accent)" }}>{nameAccent}</span>
         </span>
 
-        {/* Right: today count */}
         <div className="w-20 flex flex-col items-end">
           {todayCount > 0 && (
             <>
@@ -90,16 +124,24 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
         </div>
       </div>
 
-      {/* Row 2: fact ticker — pause on hover (desktop) or press (mobile) */}
+      {/* Row 2: fact ticker */}
       <div
-        style={{ overflow: "hidden", background: "var(--accent)", paddingTop: "5px", paddingBottom: "5px", cursor: "pointer" }}
+        className="relative"
+        style={{
+          overflow: "hidden",
+          background: "var(--accent)",
+          paddingTop: "5px",
+          paddingBottom: "5px",
+          cursor: tickerPaused ? "default" : "pointer",
+          userSelect: "none",
+        }}
         onMouseEnter={() => setTickerPaused(true)}
         onMouseLeave={() => setTickerPaused(false)}
         onTouchStart={() => setTickerPaused(true)}
         onTouchEnd={() => setTickerPaused(false)}
         onTouchCancel={() => setTickerPaused(false)}
-        title="Press and hold to pause"
       >
+        {/* Scrolling facts */}
         <div
           className="animate-ticker"
           style={{
@@ -108,16 +150,41 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
             animationPlayState: tickerPaused ? "paused" : "running",
           }}
         >
-          {[...FACTS, ...FACTS].map((fact, i) => (
+          {facts.map((fact, i) => (
             <span
               key={i}
               className="font-body font-bold uppercase"
-              style={{ fontSize: "10px", letterSpacing: "0.07em", color: "#0D0D0D", whiteSpace: "nowrap", paddingRight: "48px" }}
+              style={{
+                fontSize: "10px",
+                letterSpacing: "0.07em",
+                color: "#0D0D0D",
+                whiteSpace: "nowrap",
+                paddingRight: "52px",
+              }}
             >
               ★ {fact}
             </span>
           ))}
         </div>
+
+        {/* Pause indicator — shown when stopped */}
+        {tickerPaused && (
+          <div
+            className="absolute inset-y-0 right-0 flex items-center"
+            style={{
+              paddingRight: "10px",
+              paddingLeft: "24px",
+              background: "linear-gradient(to right, transparent, var(--accent) 40%)",
+            }}
+          >
+            <span
+              className="font-body font-bold uppercase"
+              style={{ fontSize: "9px", letterSpacing: "0.1em", color: "rgba(0,0,0,0.5)" }}
+            >
+              ⏸ paused
+            </span>
+          </div>
+        )}
       </div>
     </header>
   );
