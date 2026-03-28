@@ -19,7 +19,7 @@ function stripHtml(html: string): string {
 
 // Filter out maintenance/administrative categories — anything not meaningful to readers
 const MAINTENANCE_PATTERN =
-  /stubs?$|^(Articles|Pages|CS1|Use |Coordinates|All |Wikipedia|Webarchive|Short |Good |Featured |Spoken |Harv and Sfn|Cleanup|Orphaned|Disputed|Accuracy|Bias|Dead|External links|Living people)/i;
+  /stubs?$|(^(Articles|Pages|CS1|Use |Coordinates|All |Wikipedia|Webarchive|Short |Good |Featured |Spoken |Harv and Sfn|Cleanup|Orphaned|Disputed|Accuracy|Bias|Dead|External links|Living people|Commons category|Commons-inline|Interlanguage link|Redirects|Nocat|Tracking|Template))/i;
 
 // ─── Extract trimming ─────────────────────────────────────────────
 

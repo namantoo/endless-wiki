@@ -32,16 +32,12 @@ export default function Home() {
         selected={selectedCategory}
         onChange={handleCategoryChange}
       />
-
-      {/* Padding to account for fixed TopBar + CategoryFilterBar (~96px total) */}
-      <div style={{ height: "100dvh", paddingTop: "96px" }}>
-        <ErrorBoundary>
-          <ReelFeed
-            selectedCategory={selectedCategory}
-            onActiveIndexChange={trackView}
-          />
-        </ErrorBoundary>
-      </div>
+      <ErrorBoundary>
+        <ReelFeed
+          selectedCategory={selectedCategory}
+          onActiveIndexChange={trackView}
+        />
+      </ErrorBoundary>
     </main>
   );
 }
