@@ -1,7 +1,7 @@
 "use client";
 
 // CategoryFilterBar — horizontal scrollable chip row below the TopBar.
-// Active chip glows with accent color. Selecting resets the feed.
+// Inactive chips are quiet (tertiary text). Active chip glows with gold accent.
 
 import { CATEGORIES } from "@/lib/config/categories";
 
@@ -18,9 +18,13 @@ export default function CategoryFilterBar({
     <div
       className="fixed inset-x-0 z-40 scrollbar-none"
       style={{
-        top: "calc(env(safe-area-inset-top, 0px) + 52px)",
+        top: "calc(env(safe-area-inset-top, 0px) + 48px)",
         overflowX: "auto",
         WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"],
+        maskImage:
+          "linear-gradient(to right, transparent 0px, black 16px, black calc(100% - 16px), transparent 100%)",
+        WebkitMaskImage:
+          "linear-gradient(to right, transparent 0px, black 16px, black calc(100% - 16px), transparent 100%)",
       }}
     >
       <div className="flex gap-2 px-4 py-2" style={{ width: "max-content" }}>
@@ -30,21 +34,19 @@ export default function CategoryFilterBar({
             <button
               key={cat.label}
               onClick={() => onChange(cat.slug)}
-              className="flex-shrink-0 font-heading font-semibold transition-all duration-200"
+              className="flex-shrink-0 font-body font-medium uppercase transition-all duration-200"
               style={{
-                fontSize: "12px",
+                fontSize: "11px",
                 lineHeight: "1",
-                padding: "6px 14px",
+                padding: "5px 14px",
                 borderRadius: "9999px",
+                letterSpacing: "0.04em",
                 border: isActive
                   ? "1px solid var(--accent-border)"
-                  : "1px solid var(--border)",
-                background: isActive ? "var(--accent-dim)" : "var(--surface-3)",
-                color: isActive ? "var(--accent-light)" : "var(--text-secondary)",
-                boxShadow: isActive
-                  ? "0 0 14px var(--accent-dim)"
-                  : "none",
-                letterSpacing: "0.02em",
+                  : "1px solid rgba(255, 252, 245, 0.10)",
+                background: isActive ? "var(--accent-dim)" : "transparent",
+                color: isActive ? "var(--accent-light)" : "var(--text-tertiary)",
+                fontWeight: isActive ? 600 : 500,
               }}
             >
               {cat.label}

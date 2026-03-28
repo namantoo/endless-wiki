@@ -12,41 +12,41 @@
 
 // ─── Typography ───────────────────────────────────────────────────
 export const FONT = {
-  heading: "'Space Grotesk', system-ui, sans-serif",
+  heading: "'Newsreader', 'Georgia', serif",
   body:    "'Inter', system-ui, sans-serif",
 } as const
 
-// ─── Color Palette ────────────────────────────────────────────────
+// ─── Color Palette — "Library at Night" ──────────────────────────
 export const COLOR = {
-  // Surfaces — dark-first, no light mode in V1
-  surface0: '#080808',  // true black — behind everything
-  surface1: '#111111',  // card background (no image)
-  surface2: '#1a1a1a',  // elevated panels, expand drawer
-  surface3: '#252525',  // chips, secondary actions
+  // Surfaces — warm blacks
+  surface0: '#0A0A08',  // warm black — behind everything
+  surface1: '#121210',  // card background (no image)
+  surface2: '#1C1B18',  // elevated panels
+  surface3: '#262520',  // chips, secondary surfaces
 
-  // Text hierarchy
-  textPrimary:   'rgba(255,255,255,0.95)',
-  textSecondary: 'rgba(255,255,255,0.60)',
-  textTertiary:  'rgba(255,255,255,0.35)',
+  // Text hierarchy — cream-whites, not clinical
+  textPrimary:   'rgba(255, 252, 245, 0.93)',
+  textSecondary: 'rgba(255, 252, 245, 0.55)',
+  textTertiary:  'rgba(255, 252, 245, 0.30)',
 
-  // Brand accent — electric violet, distinct from every other dark app
-  accent:       '#7C5CFC',
-  accentLight:  '#9B84FD',
-  accentDim:    'rgba(124,92,252,0.18)',
-  accentBorder: 'rgba(124,92,252,0.45)',
+  // Brand accent — aged gold (knowledge, illumination, discovery)
+  accent:       '#C4954A',
+  accentLight:  '#D4AC6A',
+  accentDim:    'rgba(196, 149, 74, 0.14)',
+  accentBorder: 'rgba(196, 149, 74, 0.35)',
 
-  // Streak / engagement
-  streak:    '#F5A623',              // amber — fire icon, streak counter
-  streakDim: 'rgba(245,166,35,0.16)',
+  // Streak / engagement — warm amber, harmonizes with gold
+  streak:    '#E8A435',
+  streakDim: 'rgba(232, 164, 53, 0.14)',
 
-  // Structural
-  border:       'rgba(255,255,255,0.08)',
-  borderStrong: 'rgba(255,255,255,0.16)',
+  // Structural — warm tint
+  border:       'rgba(255, 252, 245, 0.07)',
+  borderStrong: 'rgba(255, 252, 245, 0.13)',
 
   // Overlays for image cards
-  overlayHeavy: 'rgba(0,0,0,0.90)',
-  overlayMid:   'rgba(0,0,0,0.52)',
-  overlayLight: 'rgba(0,0,0,0.16)',
+  overlayHeavy: 'rgba(10, 10, 8, 0.90)',
+  overlayMid:   'rgba(10, 10, 8, 0.52)',
+  overlayLight: 'rgba(10, 10, 8, 0.16)',
 } as const
 
 // ─── Spacing ──────────────────────────────────────────────────────
@@ -70,10 +70,11 @@ export const RADIUS = {
 
 // ─── Type Scale ───────────────────────────────────────────────────
 export const TYPE = {
-  label:    { size: '11px', lh: '1.2',  weight: '600', tracking: '0.08em' },
-  caption:  { size: '13px', lh: '1.4',  weight: '400' },
-  body:     { size: '15px', lh: '1.65', weight: '400' },
-  title:    { size: '28px', lh: '1.15', weight: '700' },
-  titleLg:  { size: '34px', lh: '1.1',  weight: '700' },
-  wordmark: { size: '18px', lh: '1',    weight: '700' },
+  label:    { size: '10.5px', lh: '1.2',  weight: '600', tracking: '0.06em' },
+  caption:  { size: '12px',   lh: '1.4',  weight: '500', tracking: '0.01em' },
+  body:     { size: '14.5px', lh: '1.7',  weight: '400', tracking: '0.005em' },
+  description: { size: '13px', lh: '1.35', weight: '400' },
+  title:    { size: '26px',  lh: '1.15', weight: '600', tracking: '-0.02em' },
+  titleLg:  { size: '34px',  lh: '1.08', weight: '700', tracking: '-0.025em' },
+  wordmark: { size: '20px',  lh: '1',    weight: '600', tracking: '-0.01em' },
 } as const

@@ -1,20 +1,20 @@
 // Fallback gradient palettes for articles without thumbnails.
 // Selected by colorSeed (0–5), which is derived from the article title hash.
-// These are intentional, branded — not a fallback that looks broken.
+// Warm-toned to match the "Library at Night" palette.
 
 export const GRADIENTS: string[] = [
-  // 0 — deep teal
-  'linear-gradient(160deg, #0d2c2e 0%, #0a1a1b 60%, #080808 100%)',
-  // 1 — indigo/navy
-  'linear-gradient(160deg, #111638 0%, #0c1029 60%, #080808 100%)',
-  // 2 — charcoal warm
-  'linear-gradient(160deg, #1e1610 0%, #14100a 60%, #080808 100%)',
-  // 3 — forest
-  'linear-gradient(160deg, #0d1f12 0%, #09160d 60%, #080808 100%)',
-  // 4 — burgundy
-  'linear-gradient(160deg, #1e0d14 0%, #150910 60%, #080808 100%)',
-  // 5 — slate blue
-  'linear-gradient(160deg, #111826 0%, #0c1219 60%, #080808 100%)',
+  // 0 — burnt sienna
+  'linear-gradient(160deg, #1e1410 0%, #140e0a 60%, #0A0A08 100%)',
+  // 1 — deep olive
+  'linear-gradient(160deg, #161a0e 0%, #10130a 60%, #0A0A08 100%)',
+  // 2 — warm charcoal
+  'linear-gradient(160deg, #1a1610 0%, #12100c 60%, #0A0A08 100%)',
+  // 3 — clay
+  'linear-gradient(160deg, #1e1412 0%, #15100e 60%, #0A0A08 100%)',
+  // 4 — aged bronze
+  'linear-gradient(160deg, #1a1810 0%, #13110c 60%, #0A0A08 100%)',
+  // 5 — parchment dark
+  'linear-gradient(160deg, #1c1a14 0%, #14130e 60%, #0A0A08 100%)',
 ]
 
 /** Returns a gradient string for a given seed (0–5). */

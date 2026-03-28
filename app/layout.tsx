@@ -2,10 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Providers } from "./providers";
 import "./globals.css";
 
-// Note: Space Grotesk + Inter are declared in globals.css via CSS variables
-// (--font-heading, --font-body). Google Fonts self-hosting requires network
-// access at build time. In production, replace the CSS variable values with
-// next/font/google imports once the build environment allows it.
+// Fonts are loaded via Google Fonts CDN at runtime.
+// next/font/google requires build-time network access to Google Fonts,
+// which may be blocked in some environments. The CSS variable approach
+// (--font-heading, --font-body) declared in globals.css works universally.
 
 export const metadata: Metadata = {
   title: "Weels",
@@ -16,7 +16,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#080808",
+  themeColor: "#0A0A08",
 };
 
 export default function RootLayout({
@@ -25,11 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className=""
-      suppressHydrationWarning
-    >
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="h-full overflow-hidden">
         <Providers>{children}</Providers>
       </body>

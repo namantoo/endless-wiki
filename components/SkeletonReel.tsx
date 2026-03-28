@@ -1,5 +1,5 @@
-// SkeletonReel — shimmer placeholder shown during initial load.
-// Replaces the full-screen spinner with 3 skeleton cards that feel immediate.
+// SkeletonReel — warm pulse placeholder shown during initial load.
+// Matches the three-zone card structure to hint at real content.
 
 export default function SkeletonReel() {
   return (
@@ -7,45 +7,57 @@ export default function SkeletonReel() {
       className="w-full flex-shrink-0 flex flex-col justify-end"
       style={{ height: "100dvh", background: "var(--surface-1)" }}
     >
-      {/* Simulated gradient bottom area */}
-      <div className="p-6 pb-16 space-y-3">
-        {/* Category chip */}
+      <div style={{ padding: "0 24px", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}>
+        {/* Zone 1: Category + decorative rule */}
         <div
-          className="animate-shimmer rounded-full"
-          style={{ width: "72px", height: "22px" }}
+          className="animate-warmPulse rounded"
+          style={{ width: "64px", height: "12px", marginBottom: "6px" }}
         />
-        {/* Title — two lines */}
-        <div className="space-y-2 pt-1">
+        <div
+          style={{
+            width: "24px",
+            height: "1px",
+            background: "var(--accent)",
+            opacity: 0.15,
+            marginBottom: "10px",
+          }}
+        />
+
+        {/* Zone 2: Title */}
+        <div className="space-y-2">
           <div
-            className="animate-shimmer rounded-md"
+            className="animate-warmPulse rounded-md"
             style={{ width: "85%", height: "28px" }}
           />
           <div
-            className="animate-shimmer rounded-md"
-            style={{ width: "60%", height: "28px" }}
+            className="animate-warmPulse rounded-md"
+            style={{ width: "55%", height: "28px" }}
           />
         </div>
+
         {/* Description */}
         <div
-          className="animate-shimmer rounded"
-          style={{ width: "50%", height: "16px" }}
+          className="animate-warmPulse rounded"
+          style={{ width: "45%", height: "14px", marginTop: "8px" }}
         />
-        {/* Body lines */}
-        <div className="space-y-2 pt-1">
-          {[100, 95, 88, 92, 75].map((w, i) => (
+
+        {/* Body lines — 3 lines to match clamp */}
+        <div className="space-y-2" style={{ marginTop: "12px" }}>
+          {[100, 92, 70].map((w, i) => (
             <div
               key={i}
-              className="animate-shimmer rounded"
+              className="animate-warmPulse rounded"
               style={{ width: `${w}%`, height: "14px" }}
             />
           ))}
         </div>
-        {/* Related topic pills */}
-        <div className="flex gap-2 pt-2">
-          {[80, 96, 72].map((w, i) => (
+
+        {/* Zone 3: Related topic pills */}
+        <div className="flex gap-2" style={{ marginTop: "16px" }}>
+          {[56, 72, 64].map((w, i) => (
             <div
               key={i}
-              className="animate-shimmer rounded-full"
+              className="animate-warmPulse rounded-full"
               style={{ width: `${w}px`, height: "26px" }}
             />
           ))}

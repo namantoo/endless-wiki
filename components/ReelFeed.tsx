@@ -169,20 +169,25 @@ export default function ReelFeed({
         </div>
       ))}
 
-      {/* Loading more indicator */}
+      {/* Loading more indicator — sequential pulse dots */}
       {fetchingMore && (
         <div
-          className="snap-start snap-always w-full flex items-center justify-center"
+          className="snap-start snap-always w-full flex items-center justify-center gap-2"
           style={{ height: "100dvh", background: "var(--surface-0)" }}
         >
-          <div
-            className="w-6 h-6 rounded-full border-2"
-            style={{
-              borderColor: "var(--border)",
-              borderTopColor: "var(--accent)",
-              animation: "spin 0.8s linear infinite",
-            }}
-          />
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              style={{
+                width: "4px",
+                height: "4px",
+                borderRadius: "9999px",
+                background: "var(--accent)",
+                opacity: 0.5,
+                animation: `dotPulse 1.2s ease-in-out ${i * 0.15}s infinite`,
+              }}
+            />
+          ))}
         </div>
       )}
     </div>
