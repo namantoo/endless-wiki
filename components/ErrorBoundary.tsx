@@ -9,16 +9,17 @@ interface Props {
 
 interface State {
   hasError: boolean;
+  errorMessage: string;
 }
 
 export default class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, errorMessage: "" };
   }
 
-  static getDerivedStateFromError(): State {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, errorMessage: error?.message ?? String(error) };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
@@ -50,6 +51,11 @@ export default class ErrorBoundary extends Component<Props, State> {
             <p style={{ fontSize: "14px" }}>
               Weels hit an unexpected error. Tap below to try again.
             </p>
+            {this.state.errorMessage && (
+              <p style={{ fontSize: "11px", fontFamily: "monospace", opacity: 0.5, marginTop: "8px", wordBreak: "break-all" }}>
+                {this.state.errorMessage}
+              </p>
+            )}
           </div>
           <button
             onClick={this.handleRetry}
