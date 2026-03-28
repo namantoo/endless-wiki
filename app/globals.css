@@ -147,10 +147,7 @@ html, body {
   animation: warmPulse 2s ease-in-out infinite;
 }
 
-.animate-ticker {
-  animation: ticker 90s linear infinite;
-  will-change: transform;
-}
+/* .animate-ticker removed — ticker now uses rAF in TopBar.tsx */
 
 .animate-bookmarkPulse {
   animation: bookmarkPulse 0.35s ease-out;

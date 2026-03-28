@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { APP_NAME } from "@/lib/config/tokens";
 
 // Row 1: streak · wordmark · today count
@@ -50,20 +50,103 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+// px per frame at 60 fps  →  ~24 px/s
+// Total content width ≈ 30 facts × ~500px each = ~15 000px → full loop ≈ 625 s ≈ 10 min
+// Feels leisurely on any device; adjust here only.
+const SCROLL_SPEED = 0.4;
+
 interface TopBarProps {
   streak: number;
   todayCount: number;
 }
 
 export default function TopBar({ streak, todayCount }: TopBarProps) {
-  const [tickerPaused, setTickerPaused] = useState(false);
+  // ── ticker state (only used for UI indicator) ──
+  const [isDragging, setIsDragging] = useState(false);
 
-  // Shuffle once on mount — random order every page load, no same sequence twice
-  // Duplicate the shuffled list for seamless CSS loop (second half = first half)
+  // ── rAF refs — no re-renders ──
+  const innerRef  = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef(0);          // current translateX magnitude (px)
+  const halfRef   = useRef(0);          // half-width of inner div (seamless loop point)
+  const pausedRef = useRef(false);      // hover/keyboard pause
+  const dragging  = useRef(false);      // touch/mouse drag in progress
+  const dragStartX    = useRef(0);
+  const dragStartOff  = useRef(0);
+
+  // Shuffle once on mount; duplicate for seamless loop
   const facts = useMemo(() => {
     const s = shuffle(ALL_FACTS);
     return [...s, ...s];
   }, []);
+
+  // rAF loop
+  useEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+
+    let raf: number;
+
+    function tick() {
+      if (!pausedRef.current && !dragging.current) {
+        offsetRef.current += SCROLL_SPEED;
+        const half = halfRef.current || el!.scrollWidth / 2;
+        halfRef.current = half;
+        if (offsetRef.current >= half) offsetRef.current -= half;
+      }
+      el!.style.transform = `translateX(${-offsetRef.current}px)`;
+      raf = requestAnimationFrame(tick);
+    }
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // ── touch drag handlers ──
+  function onTouchStart(e: React.TouchEvent) {
+    dragging.current = true;
+    setIsDragging(true);
+    dragStartX.current   = e.touches[0].clientX;
+    dragStartOff.current = offsetRef.current;
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    if (!dragging.current) return;
+    const dx   = dragStartX.current - e.touches[0].clientX;
+    const half = halfRef.current;
+    if (!half) return;
+    let next = dragStartOff.current + dx;
+    // wrap into [0, half)
+    next = ((next % half) + half) % half;
+    offsetRef.current = next;
+  }
+
+  function onTouchEnd() {
+    dragging.current = false;
+    setIsDragging(false);
+  }
+
+  // ── mouse drag handlers (desktop) ──
+  function onMouseDown(e: React.MouseEvent) {
+    dragging.current = true;
+    setIsDragging(true);
+    dragStartX.current   = e.clientX;
+    dragStartOff.current = offsetRef.current;
+  }
+
+  function onMouseMove(e: React.MouseEvent) {
+    if (!dragging.current) return;
+    const dx   = dragStartX.current - e.clientX;
+    const half = halfRef.current;
+    if (!half) return;
+    let next = dragStartOff.current + dx;
+    next = ((next % half) + half) % half;
+    offsetRef.current = next;
+  }
+
+  function onMouseUp() {
+    dragging.current = false;
+    setIsDragging(false);
+  }
 
   const nameMain   = APP_NAME.slice(0, -2);
   const nameAccent = APP_NAME.slice(-2);
@@ -85,16 +168,20 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
           paddingBottom: "10px",
         }}
       >
+        {/* Streak — always visible; dims to 0.28 when streak = 0 */}
         <div className="w-20 flex items-center gap-1.5">
-          {streak >= 1 && (
-            <span
-              className="flex items-center gap-1 font-body font-bold"
-              style={{ fontSize: "13px", color: "var(--streak)" }}
-            >
-              <FireIcon />
-              {streak}
-            </span>
-          )}
+          <span
+            className="flex items-center gap-1 font-body font-bold"
+            style={{
+              fontSize: "13px",
+              color: "var(--streak)",
+              opacity: streak >= 1 ? 1 : 0.28,
+              transition: "opacity 0.3s ease",
+            }}
+          >
+            <FireIcon />
+            {streak >= 1 ? streak : ""}
+          </span>
         </div>
 
         <span
@@ -124,7 +211,7 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
         </div>
       </div>
 
-      {/* Row 2: fact ticker */}
+      {/* Row 2: fact ticker — JS-driven scroll, draggable */}
       <div
         className="relative"
         style={{
@@ -132,22 +219,27 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
           background: "var(--accent)",
           paddingTop: "5px",
           paddingBottom: "5px",
-          cursor: tickerPaused ? "default" : "pointer",
+          cursor: isDragging ? "grabbing" : "grab",
           userSelect: "none",
+          WebkitUserSelect: "none",
         }}
-        onMouseEnter={() => setTickerPaused(true)}
-        onMouseLeave={() => setTickerPaused(false)}
-        onTouchStart={() => setTickerPaused(true)}
-        onTouchEnd={() => setTickerPaused(false)}
-        onTouchCancel={() => setTickerPaused(false)}
+        onMouseEnter={() => { pausedRef.current = true; }}
+        onMouseLeave={() => { pausedRef.current = false; dragging.current = false; setIsDragging(false); }}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
       >
-        {/* Scrolling facts */}
+        {/* Inner strip — transformed by rAF */}
         <div
-          className="animate-ticker"
+          ref={innerRef}
           style={{
             display: "flex",
             width: "max-content",
-            animationPlayState: tickerPaused ? "paused" : "running",
+            willChange: "transform",
           }}
         >
           {facts.map((fact, i) => (
@@ -167,10 +259,10 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
           ))}
         </div>
 
-        {/* Pause indicator — shown when stopped */}
-        {tickerPaused && (
+        {/* Drag-to-scroll hint — shown while dragging */}
+        {isDragging && (
           <div
-            className="absolute inset-y-0 right-0 flex items-center"
+            className="absolute inset-y-0 right-0 flex items-center pointer-events-none"
             style={{
               paddingRight: "10px",
               paddingLeft: "24px",
@@ -181,7 +273,7 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
               className="font-body font-bold uppercase"
               style={{ fontSize: "9px", letterSpacing: "0.1em", color: "rgba(0,0,0,0.5)" }}
             >
-              ⏸ paused
+              ‹ drag ›
             </span>
           </div>
         )}
