@@ -1,37 +1,37 @@
 @import "tailwindcss";
 
-/* ─── Base — "Library at Night" palette ─────────────────────────── */
+/* ─── Base — "Editorial Pop" palette ────────────────────────────── */
 :root {
   color-scheme: dark;
 
   /* Typography */
-  --font-heading: 'Newsreader', 'Georgia', serif;
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
   --font-body:    'Inter', system-ui, sans-serif;
 
-  /* Surfaces — warm blacks */
-  --surface-0: #0A0A08;
-  --surface-1: #121210;
-  --surface-2: #1C1B18;
-  --surface-3: #262520;
+  /* Surfaces — pure blacks */
+  --surface-0: #0D0D0D;
+  --surface-1: #161616;
+  --surface-2: #202020;
+  --surface-3: #2B2B2B;
 
-  /* Text — cream-whites */
-  --text-primary:   rgba(255, 252, 245, 0.93);
-  --text-secondary: rgba(255, 252, 245, 0.55);
-  --text-tertiary:  rgba(255, 252, 245, 0.30);
+  /* Text — pure whites */
+  --text-primary:   rgba(255, 255, 255, 0.94);
+  --text-secondary: rgba(255, 255, 255, 0.58);
+  --text-tertiary:  rgba(255, 255, 255, 0.32);
 
-  /* Accent — aged gold */
-  --accent:        #C4954A;
-  --accent-light:  #D4AC6A;
-  --accent-dim:    rgba(196, 149, 74, 0.14);
-  --accent-border: rgba(196, 149, 74, 0.35);
+  /* Accent — electric lime */
+  --accent:        #C6FF47;
+  --accent-light:  #D4FF70;
+  --accent-dim:    rgba(198, 255, 71, 0.12);
+  --accent-border: rgba(198, 255, 71, 0.38);
 
-  /* Streak — warm amber */
-  --streak:     #E8A435;
-  --streak-dim: rgba(232, 164, 53, 0.14);
+  /* Streak — vivid orange, distinct from lime */
+  --streak:     #FF9F47;
+  --streak-dim: rgba(255, 159, 71, 0.14);
 
   /* Structural */
-  --border:        rgba(255, 252, 245, 0.07);
-  --border-strong: rgba(255, 252, 245, 0.13);
+  --border:        rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
 }
 
 /* Expose tokens to Tailwind utilities */
@@ -93,6 +93,11 @@ html, body {
   }
 }
 
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 @keyframes bookmarkPulse {
   0%   { transform: scale(1); }
   40%  { transform: scale(0.85); }
@@ -140,6 +145,11 @@ html, body {
 
 .animate-warmPulse {
   animation: warmPulse 2s ease-in-out infinite;
+}
+
+.animate-ticker {
+  animation: ticker 32s linear infinite;
+  will-change: transform;
 }
 
 .animate-bookmarkPulse {

@@ -12,41 +12,41 @@
 
 // ─── Typography ───────────────────────────────────────────────────
 export const FONT = {
-  heading: "'Newsreader', 'Georgia', serif",
+  heading: "'Space Grotesk', system-ui, sans-serif",
   body:    "'Inter', system-ui, sans-serif",
 } as const
 
-// ─── Color Palette — "Library at Night" ──────────────────────────
+// ─── Color Palette — "Editorial Pop" ─────────────────────────────
 export const COLOR = {
-  // Surfaces — warm blacks
-  surface0: '#0A0A08',  // warm black — behind everything
-  surface1: '#121210',  // card background (no image)
-  surface2: '#1C1B18',  // elevated panels
-  surface3: '#262520',  // chips, secondary surfaces
+  // Surfaces — pure blacks
+  surface0: '#0D0D0D',  // pure black — behind everything
+  surface1: '#161616',  // card background (no image)
+  surface2: '#202020',  // elevated panels
+  surface3: '#2B2B2B',  // chips, secondary surfaces
 
-  // Text hierarchy — cream-whites, not clinical
-  textPrimary:   'rgba(255, 252, 245, 0.93)',
-  textSecondary: 'rgba(255, 252, 245, 0.55)',
-  textTertiary:  'rgba(255, 252, 245, 0.30)',
+  // Text hierarchy — pure whites
+  textPrimary:   'rgba(255, 255, 255, 0.94)',
+  textSecondary: 'rgba(255, 255, 255, 0.58)',
+  textTertiary:  'rgba(255, 255, 255, 0.32)',
 
-  // Brand accent — aged gold (knowledge, illumination, discovery)
-  accent:       '#C4954A',
-  accentLight:  '#D4AC6A',
-  accentDim:    'rgba(196, 149, 74, 0.14)',
-  accentBorder: 'rgba(196, 149, 74, 0.35)',
+  // Brand accent — electric lime (punchy, fun, discovery energy)
+  accent:       '#C6FF47',
+  accentLight:  '#D4FF70',
+  accentDim:    'rgba(198, 255, 71, 0.12)',
+  accentBorder: 'rgba(198, 255, 71, 0.38)',
 
-  // Streak / engagement — warm amber, harmonizes with gold
-  streak:    '#E8A435',
-  streakDim: 'rgba(232, 164, 53, 0.14)',
+  // Streak / engagement — vivid orange, distinct from lime
+  streak:    '#FF9F47',
+  streakDim: 'rgba(255, 159, 71, 0.14)',
 
-  // Structural — warm tint
-  border:       'rgba(255, 252, 245, 0.07)',
-  borderStrong: 'rgba(255, 252, 245, 0.13)',
+  // Structural
+  border:       'rgba(255, 255, 255, 0.08)',
+  borderStrong: 'rgba(255, 255, 255, 0.16)',
 
   // Overlays for image cards
-  overlayHeavy: 'rgba(10, 10, 8, 0.90)',
-  overlayMid:   'rgba(10, 10, 8, 0.52)',
-  overlayLight: 'rgba(10, 10, 8, 0.16)',
+  overlayHeavy: 'rgba(13, 13, 13, 0.90)',
+  overlayMid:   'rgba(13, 13, 13, 0.52)',
+  overlayLight: 'rgba(13, 13, 13, 0.16)',
 } as const
 
 // ─── Spacing ──────────────────────────────────────────────────────

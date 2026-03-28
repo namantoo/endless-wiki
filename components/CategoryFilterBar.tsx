@@ -18,7 +18,7 @@ export default function CategoryFilterBar({
     <div
       className="fixed inset-x-0 z-40 scrollbar-none"
       style={{
-        top: "calc(env(safe-area-inset-top, 0px) + 48px)",
+        top: "calc(env(safe-area-inset-top, 0px) + 76px)",
         overflowX: "auto",
         WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"],
         maskImage:
@@ -42,11 +42,11 @@ export default function CategoryFilterBar({
                 borderRadius: "9999px",
                 letterSpacing: "0.04em",
                 border: isActive
-                  ? "1px solid var(--accent-border)"
-                  : "1px solid rgba(255, 252, 245, 0.10)",
-                background: isActive ? "var(--accent-dim)" : "transparent",
-                color: isActive ? "var(--accent-light)" : "var(--text-tertiary)",
-                fontWeight: isActive ? 600 : 500,
+                  ? "1.5px solid var(--accent)"
+                  : "1px solid rgba(255,255,255,0.12)",
+                background: isActive ? "var(--accent)" : "transparent",
+                color: isActive ? "#0D0D0D" : "var(--text-tertiary)",
+                fontWeight: isActive ? 700 : 500,
               }}
             >
               {cat.label}

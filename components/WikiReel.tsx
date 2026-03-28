@@ -25,11 +25,10 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
       thumbnail: article.thumbnail?.source,
       pageUrl: article.pageUrl,
     });
-    // Trigger pulse animation
     const el = bookmarkRef.current;
     if (el) {
       el.classList.remove("animate-bookmarkPulse");
-      void el.offsetWidth; // reflow to restart animation
+      void el.offsetWidth;
       el.classList.add("animate-bookmarkPulse");
     }
   }, [article, toggle]);
@@ -38,9 +37,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
     if (navigator.share) {
       try {
         await navigator.share({ title: article.title, url: article.pageUrl });
-      } catch {
-        // User cancelled or not supported
-      }
+      } catch { /* cancelled */ }
     } else {
       await navigator.clipboard.writeText(article.pageUrl).catch(() => {});
     }
@@ -53,11 +50,11 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
       className="relative w-full overflow-hidden"
       style={{
         height: "100dvh",
-        opacity: isActive ? 1 : 0.45,
-        transition: "opacity 0.4s ease",
+        opacity: isActive ? 1 : 0.5,
+        transition: "opacity 0.35s ease",
       }}
     >
-      {/* ── Background ─────────────────────────────────────────── */}
+      {/* ── Background ─────────────────────────────────────── */}
       {article.thumbnail ? (
         <>
           <Image
@@ -68,42 +65,59 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
             priority={isActive}
             sizes="100vw"
             style={{
-              transition: "transform 0.6s ease",
-              transform: isActive ? "scale(1)" : "scale(1.03)",
+              transition: "transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)",
+              transform: isActive ? "scale(1)" : "scale(1.05)",
             }}
           />
+          {/* Gradient — lighter at top, heavier only near bottom */}
           <div
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to top, rgba(10,10,8,0.97) 0%, rgba(10,10,8,0.85) 18%, rgba(10,10,8,0.45) 45%, rgba(10,10,8,0.08) 70%, transparent 100%)",
+                "linear-gradient(to top, rgba(13,13,13,0.65) 0%, rgba(13,13,13,0.25) 40%, transparent 70%)",
             }}
           />
         </>
       ) : (
-        <div
-          className="absolute inset-0"
-          style={{ background: getGradient(article.colorSeed) }}
-        />
+        <>
+          {/* Fallback gradient */}
+          <div
+            className="absolute inset-0"
+            style={{ background: getGradient(article.colorSeed) }}
+          />
+          {/* Dot texture overlay — adds depth on no-image cards */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
+              backgroundSize: "22px 22px",
+            }}
+          />
+        </>
       )}
 
-      {/* ── Right action rail — vertically centered ──────────── */}
+      {/* ── Right action rail ──────────────────────────────── */}
       <div
-        className="absolute right-4 flex flex-col gap-4"
+        className="absolute right-4 flex flex-col gap-3"
         style={{ top: "50%", transform: "translateY(-50%)" }}
       >
         <button
           ref={bookmarkRef}
           onClick={handleBookmark}
-          className="flex items-center justify-center transition-transform active:scale-90"
+          className="flex items-center justify-center active:scale-90 transition-transform"
           style={{
-            width: "40px",
-            height: "40px",
+            width: "42px",
+            height: "42px",
             borderRadius: "9999px",
-            background: saved ? "var(--accent-dim)" : "rgba(10,10,8,0.5)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            border: saved ? "1px solid var(--accent-border)" : "none",
+            background: saved
+              ? "var(--accent)"
+              : "rgba(13,13,13,0.55)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            border: saved
+              ? "none"
+              : "1px solid rgba(255,255,255,0.14)",
           }}
           aria-label={saved ? "Remove bookmark" : "Bookmark article"}
         >
@@ -112,14 +126,15 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
 
         <button
           onClick={handleShare}
-          className="flex items-center justify-center transition-transform active:scale-90"
+          className="flex items-center justify-center active:scale-90 transition-transform"
           style={{
-            width: "40px",
-            height: "40px",
+            width: "42px",
+            height: "42px",
             borderRadius: "9999px",
-            background: "rgba(10,10,8,0.5)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
+            background: "rgba(13,13,13,0.55)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            border: "1px solid rgba(255,255,255,0.14)",
           }}
           aria-label="Share article"
         >
@@ -127,64 +142,59 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
         </button>
       </div>
 
-      {/* ── Content — three-zone layout anchored to bottom ────── */}
+      {/* ── Content — frosted glass bottom-sheet panel ─────── */}
       <div
         className="absolute left-0 right-0 bottom-0"
         style={{
-          padding: "0 24px",
-          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)",
+          background: "rgba(13,13,13,0.78)",
+          backdropFilter: "blur(28px)",
+          WebkitBackdropFilter: "blur(28px)",
+          borderRadius: "22px 22px 0 0",
+          borderTop: "1px solid rgba(255,255,255,0.12)",
+          padding: "20px 22px",
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)",
         }}
       >
-        {/* Zone 1: Identity */}
-        <div className="animate-cardReveal">
+        {/* Zone 1: Category chip — filled lime pill */}
+        <div className="animate-cardReveal" style={{ marginBottom: "10px" }}>
           {article.categories[0] && (
-            <>
-              <span
-                className="font-body font-semibold uppercase"
-                style={{
-                  fontSize: "10.5px",
-                  color: "var(--accent-light)",
-                  letterSpacing: "0.06em",
-                  lineHeight: "1.2",
-                }}
-              >
-                {article.categories[0]}
-              </span>
-              {/* Decorative rule */}
-              <div
-                style={{
-                  width: "24px",
-                  height: "1px",
-                  background: "var(--accent)",
-                  opacity: 0.4,
-                  marginTop: "6px",
-                  marginBottom: "10px",
-                }}
-              />
-            </>
+            <span
+              className="font-body font-bold uppercase"
+              style={{
+                fontSize: "10px",
+                letterSpacing: "0.09em",
+                padding: "3px 10px",
+                borderRadius: "9999px",
+                background: "var(--accent)",
+                color: "#0D0D0D",
+                display: "inline-block",
+                lineHeight: "1.6",
+              }}
+            >
+              {article.categories[0]}
+            </span>
           )}
         </div>
 
-        {/* Zone 2: Core */}
+        {/* Zone 2: Title + description + extract */}
         <div className="animate-cardReveal-d1">
-          {/* Title */}
           <h1
-            className="font-heading font-semibold"
+            className="font-heading font-bold"
             style={{
-              fontSize: "clamp(26px, 5vw, 34px)",
-              lineHeight: "1.12",
-              letterSpacing: "-0.02em",
+              fontSize: "clamp(22px, 5.5vw, 30px)",
+              lineHeight: "1.1",
+              letterSpacing: "-0.025em",
               color: "var(--text-primary)",
               display: "-webkit-box",
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
+              marginBottom: "4px",
             }}
           >
             {article.displayTitle}
           </h1>
 
-          {/* Wikidata description */}
           {article.description && (
             <p
               className="font-body"
@@ -192,7 +202,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
                 fontSize: "13px",
                 lineHeight: "1.35",
                 color: "var(--text-secondary)",
-                marginTop: "4px",
+                marginBottom: "10px",
                 display: "-webkit-box",
                 WebkitLineClamp: 1,
                 WebkitBoxOrient: "vertical",
@@ -203,84 +213,84 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
             </p>
           )}
 
-          {/* Extract */}
-          <div style={{ marginTop: "12px" }}>
-            <p
-              className="font-body"
+          <p
+            className="font-body"
+            style={{
+              fontSize: "14px",
+              lineHeight: "1.65",
+              color: "rgba(255,255,255,0.80)",
+              display: expanded ? "block" : "-webkit-box",
+              WebkitLineClamp: expanded ? undefined : 3,
+              WebkitBoxOrient: expanded ? undefined : "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {expanded ? article.extractFull : article.extract}
+          </p>
+          {hasMore && (
+            <button
+              onClick={() => setExpanded((e) => !e)}
+              className="font-body font-semibold transition-opacity hover:opacity-70"
               style={{
-                fontSize: "14.5px",
-                lineHeight: "1.7",
-                color: "rgba(255, 252, 245, 0.82)",
-                letterSpacing: "0.005em",
-                display: expanded ? "block" : "-webkit-box",
-                WebkitLineClamp: expanded ? undefined : 3,
-                WebkitBoxOrient: expanded ? undefined : "vertical",
-                overflow: "hidden",
+                fontSize: "12px",
+                color: "var(--accent)",
+                marginTop: "4px",
+                display: "block",
               }}
             >
-              {expanded ? article.extractFull : article.extract}
-            </p>
-            {hasMore && (
-              <button
-                onClick={() => setExpanded((e) => !e)}
-                className="font-body font-medium transition-opacity hover:opacity-70"
-                style={{
-                  fontSize: "12px",
-                  color: "var(--accent-light)",
-                  marginTop: "4px",
-                }}
-              >
-                {expanded ? "Show less" : "Read more \u203a"}
-              </button>
-            )}
-          </div>
+              {expanded ? "Show less" : "Read more ›"}
+            </button>
+          )}
         </div>
 
-        {/* Zone 3: Actions */}
-        <div className="animate-cardReveal-d2" style={{ marginTop: "16px" }}>
-          {/* Wikipedia link */}
-          <a
-            href={article.pageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 font-body font-medium transition-opacity hover:opacity-70"
-            style={{ fontSize: "12px", color: "var(--text-tertiary)" }}
-          >
-            Wikipedia
-            <ArrowIcon />
-          </a>
-
-          {/* Related topic pills */}
-          {article.relatedTopics.length > 0 && (
-            <div
-              className="flex gap-2 scrollbar-none"
-              style={{ overflowX: "auto", marginTop: "12px" }}
+        {/* Zone 3: Wikipedia link + related pills */}
+        <div className="animate-cardReveal-d2" style={{ marginTop: "14px" }}>
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Wikipedia link — styled as an outlined pill */}
+            <a
+              href={article.pageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-body font-medium inline-flex items-center gap-1 transition-opacity hover:opacity-70"
+              style={{
+                fontSize: "11.5px",
+                padding: "4px 11px",
+                borderRadius: "9999px",
+                border: "1px solid rgba(255,255,255,0.22)",
+                color: "var(--text-secondary)",
+                whiteSpace: "nowrap",
+              }}
             >
-              {article.relatedTopics.map((topic) => (
-                <a
-                  key={topic.title}
-                  href={topic.pageUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 font-body font-medium transition-all hover:opacity-80"
-                  style={{
-                    fontSize: "11.5px",
-                    padding: "5px 12px",
-                    borderRadius: "9999px",
-                    background: "var(--surface-3)",
-                    color: "var(--text-secondary)",
-                    whiteSpace: "nowrap",
-                    maxWidth: "160px",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "block",
-                  }}
-                >
-                  {topic.title}
-                </a>
-              ))}
-            </div>
-          )}
+              Wikipedia
+              <ArrowIcon />
+            </a>
+
+            {/* Related topic pills */}
+            {article.relatedTopics.map((topic) => (
+              <a
+                key={topic.title}
+                href={topic.pageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-body font-medium transition-opacity hover:opacity-70"
+                style={{
+                  fontSize: "11.5px",
+                  padding: "4px 11px",
+                  borderRadius: "9999px",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  background: "rgba(255,255,255,0.05)",
+                  color: "var(--text-tertiary)",
+                  whiteSpace: "nowrap",
+                  maxWidth: "140px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "block",
+                }}
+              >
+                {topic.title}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -292,8 +302,8 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
 function BookmarkIcon({ filled }: { filled: boolean }) {
   return (
     <svg width="17" height="17" viewBox="0 0 24 24"
-      fill={filled ? "var(--accent)" : "none"}
-      stroke={filled ? "var(--accent)" : "rgba(255,252,245,0.7)"}
+      fill={filled ? "#0D0D0D" : "none"}
+      stroke={filled ? "#0D0D0D" : "rgba(255,255,255,0.75)"}
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
     </svg>
@@ -303,7 +313,7 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
 function ShareIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24"
-      fill="none" stroke="rgba(255,252,245,0.7)"
+      fill="none" stroke="rgba(255,255,255,0.75)"
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
       <polyline points="16 6 12 2 8 6" />
@@ -314,9 +324,9 @@ function ShareIcon() {
 
 function ArrowIcon() {
   return (
-    <svg width="11" height="11" viewBox="0 0 24 24"
+    <svg width="10" height="10" viewBox="0 0 24 24"
       fill="none" stroke="currentColor"
-      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <line x1="5" y1="12" x2="19" y2="12" />
       <polyline points="12 5 19 12 12 19" />
     </svg>

@@ -5,9 +5,18 @@ export default function SkeletonReel() {
   return (
     <div
       className="w-full flex-shrink-0 flex flex-col justify-end"
-      style={{ height: "100dvh", background: "var(--surface-1)" }}
+      style={{ height: "100dvh", background: "var(--surface-0)" }}
     >
-      <div style={{ padding: "0 24px", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}>
+      {/* Glass panel mirror */}
+      <div style={{
+        background: "rgba(13,13,13,0.78)",
+        backdropFilter: "blur(28px)",
+        WebkitBackdropFilter: "blur(28px)",
+        borderRadius: "22px 22px 0 0",
+        borderTop: "1px solid rgba(255,255,255,0.12)",
+        padding: "20px 22px",
+        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)",
+      }}>
         {/* Zone 1: Category + decorative rule */}
         <div
           className="animate-warmPulse rounded"
