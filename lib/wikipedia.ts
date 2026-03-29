@@ -233,32 +233,32 @@ export async function getRandomArticles(
 }
 
 /** Fetch N articles from a pool of specific Wikipedia subcategories.
- *  One subcategory is picked at random per call + random A-Z start key
- *  → ~26 × pool.length distinct entry points per topic.
+ *  Picks 2–3 subcategories in parallel, each with a different random A-Z
+ *  start key → drastically more variety than a single-category fetch.
  */
 export async function getArticlesByCategory(
   slugPool: string | string[],
   count: number = 5
 ): Promise<WikiArticle[]> {
   const pool = Array.isArray(slugPool) ? slugPool : [slugPool];
-  const categorySlug = pool[Math.floor(Math.random() * pool.length)];
+
+  // Pick up to 3 distinct subcategories per request
+  const shuffledPool = shuffle(pool);
+  const selectedCats = shuffledPool.slice(0, Math.min(3, pool.length));
 
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const randomPrefix = alphabet[Math.floor(Math.random() * alphabet.length)];
+  // Give each subcategory a distinct letter so results don't overlap
+  const prefixes = shuffle([...alphabet]).slice(0, selectedCats.length);
 
-  const poolSize = Math.min(count * 6, 50);
-
-  async function fetchFromCategory(
-    slug: string,
-    prefix: string
-  ): Promise<string[]> {
+  async function fetchFromCategory(slug: string, prefix: string): Promise<string[]> {
+    const perCat = Math.min(count * 4, 30);
     const params = new URLSearchParams({
       action: "query",
       list: "categorymembers",
       cmtitle: `Category:${slug}`,
       cmnamespace: "0",
       cmtype: "page",
-      cmlimit: String(poolSize),
+      cmlimit: String(perCat),
       cmsort: "sortkey",
       cmstartsortkeyprefix: prefix,
       format: "json",
@@ -268,29 +268,40 @@ export async function getArticlesByCategory(
       headers: WP_HEADERS,
       cache: "no-store",
     });
+    if (!res.ok) return [];
     const data = await res.json();
-    return (data?.query?.categorymembers ?? []).map(
+    let titles: string[] = (data?.query?.categorymembers ?? []).map(
       (p: { title: string }) => p.title
     );
+
+    // Sparse letter bucket — retry with a different letter
+    if (titles.length < 3) {
+      const retry = alphabet[Math.floor(Math.random() * alphabet.length)];
+      const p2 = new URLSearchParams({ ...Object.fromEntries(params), cmstartsortkeyprefix: retry });
+      const r2 = await fetch(`${ACTION_API}?${p2}`, { headers: WP_HEADERS, cache: "no-store" });
+      if (r2.ok) {
+        const d2 = await r2.json();
+        titles = (d2?.query?.categorymembers ?? []).map((p: { title: string }) => p.title);
+      }
+    }
+    return titles;
   }
 
-  let titles = await fetchFromCategory(categorySlug, randomPrefix);
+  // Fetch all selected categories in parallel
+  const titleArrays = await Promise.all(
+    selectedCats.map((slug, i) => fetchFromCategory(slug, prefixes[i]))
+  );
 
-  // Sparse letter window — try a different letter
-  if (titles.length < count) {
-    const fallbackPrefix =
-      alphabet[Math.floor(Math.random() * alphabet.length)];
-    titles = await fetchFromCategory(categorySlug, fallbackPrefix);
+  // Interleave results so we don't get all articles from one category first
+  const interleaved: string[] = [];
+  const maxLen = Math.max(...titleArrays.map((a) => a.length));
+  for (let i = 0; i < maxLen; i++) {
+    for (const arr of titleArrays) {
+      if (arr[i]) interleaved.push(arr[i]);
+    }
   }
 
-  // Still sparse — try a different subcategory from the pool
-  if (titles.length < count && pool.length > 1) {
-    const others = pool.filter((s) => s !== categorySlug);
-    const fallbackSlug = others[Math.floor(Math.random() * others.length)];
-    titles = await fetchFromCategory(fallbackSlug, randomPrefix);
-  }
-
-  const picked = shuffle(titles).slice(0, count + 5);
+  const picked = shuffle(interleaved).slice(0, count + 8);
   const results = await Promise.allSettled(picked.map(enrichArticle));
 
   return results

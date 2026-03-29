@@ -8,6 +8,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import SwipeHint from "@/components/SwipeHint";
 import BookmarksDrawer from "@/components/BookmarksDrawer";
 import SearchDrawer from "@/components/SearchDrawer";
+import InstallBanner from "@/components/InstallBanner";
 import type { ReelFeedHandle } from "@/components/ReelFeed";
 
 const ReelFeed = dynamic(() => import("@/components/ReelFeed"), { ssr: false });
@@ -41,6 +42,7 @@ export default function Home() {
       </ErrorBoundary>
 
       <SwipeHint />
+      <InstallBanner />
       <BookmarksDrawer open={bookmarksOpen} onClose={() => setBookmarksOpen(false)} />
       <SearchDrawer
         open={searchOpen}
