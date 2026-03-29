@@ -214,19 +214,39 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
             </p>
           )}
 
-          <p
-            className="font-body"
-            style={{
-              fontSize: "14px", lineHeight: "1.65",
-              color: "rgba(255,255,255,0.80)",
-              display: expanded ? "block" : "-webkit-box",
-              WebkitLineClamp: expanded ? undefined : 3,
-              WebkitBoxOrient: expanded ? undefined : "vertical",
-              overflow: "hidden",
-            }}
-          >
-            {expanded ? article.extractFull : article.extract}
-          </p>
+          {expanded ? (
+            <div
+              style={{
+                maxHeight: "28vh",
+                overflowY: "auto",
+                WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"],
+                maskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
+                WebkitMaskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
+                paddingRight: "4px",
+              }}
+            >
+              <p
+                className="font-body"
+                style={{ fontSize: "14px", lineHeight: "1.65", color: "rgba(255,255,255,0.80)" }}
+              >
+                {article.extractFull}
+              </p>
+            </div>
+          ) : (
+            <p
+              className="font-body"
+              style={{
+                fontSize: "14px", lineHeight: "1.65",
+                color: "rgba(255,255,255,0.80)",
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {article.extract}
+            </p>
+          )}
           {hasMore && (
             <button
               onClick={() => setExpanded((e) => !e)}
