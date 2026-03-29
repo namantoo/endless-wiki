@@ -281,7 +281,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
       <div
         onClick={() => { haptic.light(); setExpanded(false); }}
         style={{
-          position: "absolute", inset: 0, zIndex: 10,
+          position: "fixed", inset: 0, zIndex: 200,
           background: "rgba(0,0,0,0.55)",
           backdropFilter: "blur(4px)",
           WebkitBackdropFilter: "blur(4px)",
@@ -294,7 +294,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
       {/* Sheet */}
       <div
         style={{
-          position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 11,
+          position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 201,
           height: "88dvh",
           background: "rgba(16,16,16,0.97)",
           backdropFilter: "blur(32px)",
