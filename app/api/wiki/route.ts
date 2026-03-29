@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRandomArticles, getArticlesByCategory } from "@/lib/wikipedia";
+import { CATEGORIES } from "@/lib/config/categories";
 
 // Force dynamic — this endpoint returns random articles, must never be statically cached
 export const dynamic = "force-dynamic";
@@ -14,9 +15,15 @@ export async function GET(req: NextRequest) {
   const topic = req.nextUrl.searchParams.get("topic"); // null = random
 
   try {
-    const articles = topic
-      ? await getArticlesByCategory(topic, count)
-      : await getRandomArticles(count);
+    let articles;
+    if (topic) {
+      // Look up the pool for this topic slug so the API uses deep subcategories
+      const cat = CATEGORIES.find(c => c.slug === topic);
+      const pool = cat?.pool ?? [topic];
+      articles = await getArticlesByCategory(pool, count);
+    } else {
+      articles = await getRandomArticles(count);
+    }
 
     return NextResponse.json(articles, {
       headers: { "Cache-Control": "no-store" },

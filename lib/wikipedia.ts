@@ -199,59 +199,60 @@ export async function getRandomArticles(
     .slice(0, count);
 }
 
-/** Fetch N articles from a specific Wikipedia category, randomly sampled. */
+/** Fetch N articles from a specific Wikipedia category pool, randomly sampled.
+ *  `slugPool` is an array of specific subcategory names — one is picked at
+ *  random per call, then a random A-Z start key is applied on top, giving
+ *  26 × pool.length distinct entry points into Wikipedia per topic.
+ */
 export async function getArticlesByCategory(
-  categorySlug: string,
+  slugPool: string | string[],
   count: number = 5
 ): Promise<WikiArticle[]> {
-  // Sort by sortkey (alphabetical) and jump to a random starting letter.
-  // This gives genuine variety across large categories — not always newest/oldest.
+  const pool = Array.isArray(slugPool) ? slugPool : [slugPool];
+  // Pick a random subcategory from the pool
+  const categorySlug = pool[Math.floor(Math.random() * pool.length)];
+
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const randomPrefix = alphabet[Math.floor(Math.random() * alphabet.length)];
 
   const poolSize = Math.min(count * 6, 50);
-  const params = new URLSearchParams({
-    action: "query",
-    list: "categorymembers",
-    cmtitle: `Category:${categorySlug}`,
-    cmnamespace: "0",
-    cmlimit: String(poolSize),
-    cmsort: "sortkey",
-    cmstartsortkeyprefix: randomPrefix,
-    format: "json",
-    origin: "*",
-  });
 
-  const res = await fetch(`${ACTION_API}?${params}`, { headers: WP_HEADERS, cache: "no-store" });
-  const data = await res.json();
-  let allTitles: string[] = (data?.query?.categorymembers ?? []).map(
-    (p: { title: string }) => p.title
-  );
-
-  // If the random letter had too few results, fall back to a timestamp-sorted fetch
-  if (allTitles.length < count) {
-    const fallbackParams = new URLSearchParams({
+  async function fetchFromCategory(slug: string, prefix: string): Promise<string[]> {
+    const params = new URLSearchParams({
       action: "query",
       list: "categorymembers",
-      cmtitle: `Category:${categorySlug}`,
+      cmtitle: `Category:${slug}`,
       cmnamespace: "0",
+      cmtype: "page",           // articles only — skip subcategory entries
       cmlimit: String(poolSize),
-      cmsort: "timestamp",
-      cmdir: Math.random() > 0.5 ? "desc" : "asc",
+      cmsort: "sortkey",
+      cmstartsortkeyprefix: prefix,
       format: "json",
       origin: "*",
     });
-    const fb = await fetch(`${ACTION_API}?${fallbackParams}`, { headers: WP_HEADERS, cache: "no-store" });
-    const fbData = await fb.json();
-    allTitles = (fbData?.query?.categorymembers ?? []).map(
-      (p: { title: string }) => p.title
-    );
+    const res = await fetch(`${ACTION_API}?${params}`, { headers: WP_HEADERS, cache: "no-store" });
+    const data = await res.json();
+    return (data?.query?.categorymembers ?? []).map((p: { title: string }) => p.title);
   }
 
-  // Shuffle so even within the same letter window, order varies
-  const titles = shuffle(allTitles).slice(0, count + 5);
+  let titles = await fetchFromCategory(categorySlug, randomPrefix);
 
-  const results = await Promise.allSettled(titles.map(enrichArticle));
+  // If the random letter window is sparse, try a different letter in the same category
+  if (titles.length < count) {
+    const fallbackPrefix = alphabet[Math.floor(Math.random() * alphabet.length)];
+    titles = await fetchFromCategory(categorySlug, fallbackPrefix);
+  }
+
+  // Still sparse? Try a different subcategory from the pool
+  if (titles.length < count && pool.length > 1) {
+    const fallbackSlug = pool.filter(s => s !== categorySlug)[
+      Math.floor(Math.random() * (pool.length - 1))
+    ];
+    titles = await fetchFromCategory(fallbackSlug, randomPrefix);
+  }
+
+  const picked = shuffle(titles).slice(0, count + 5);
+  const results = await Promise.allSettled(picked.map(enrichArticle));
 
   return results
     .filter(

@@ -3,10 +3,9 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { APP_NAME } from "@/lib/config/tokens";
 
-// Row 1: streak · wordmark · today count
+// Row 1: wordmark
 // Row 2: scrolling fact ticker — shuffled randomly on each page load
 
-// 30 facts — enough that one full scroll takes ~90s, so repeats are never noticeable
 const ALL_FACTS = [
   "Honey never expires — 3,000-year-old honey found in Egyptian tombs was still edible",
   "A group of flamingos is called a flamboyance",
@@ -40,7 +39,6 @@ const ALL_FACTS = [
   "Cleopatra's reign was closer to the invention of the iPhone than to the construction of the Great Pyramid",
 ];
 
-// Fisher-Yates shuffle
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -50,40 +48,28 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// px per frame at 60 fps  →  ~24 px/s
-// Total content width ≈ 30 facts × ~500px each = ~15 000px → full loop ≈ 625 s ≈ 10 min
-// Feels leisurely on any device; adjust here only.
+// px per frame at 60 fps → ~24 px/s, leisurely on any device
 const SCROLL_SPEED = 0.4;
 
-interface TopBarProps {
-  streak: number;
-  todayCount: number;
-}
-
-export default function TopBar({ streak, todayCount }: TopBarProps) {
-  // ── ticker state (only used for UI indicator) ──
+export default function TopBar() {
   const [isDragging, setIsDragging] = useState(false);
 
-  // ── rAF refs — no re-renders ──
-  const innerRef  = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef(0);          // current translateX magnitude (px)
-  const halfRef   = useRef(0);          // half-width of inner div (seamless loop point)
-  const pausedRef = useRef(false);      // hover/keyboard pause
-  const dragging  = useRef(false);      // touch/mouse drag in progress
-  const dragStartX    = useRef(0);
-  const dragStartOff  = useRef(0);
+  const innerRef     = useRef<HTMLDivElement>(null);
+  const offsetRef    = useRef(0);
+  const halfRef      = useRef(0);
+  const pausedRef    = useRef(false);
+  const dragging     = useRef(false);
+  const dragStartX   = useRef(0);
+  const dragStartOff = useRef(0);
 
-  // Shuffle once on mount; duplicate for seamless loop
   const facts = useMemo(() => {
     const s = shuffle(ALL_FACTS);
     return [...s, ...s];
   }, []);
 
-  // rAF loop
   useEffect(() => {
     const el = innerRef.current;
     if (!el) return;
-
     let raf: number;
 
     function tick() {
@@ -101,52 +87,35 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  // ── touch drag handlers ──
   function onTouchStart(e: React.TouchEvent) {
     dragging.current = true;
     setIsDragging(true);
     dragStartX.current   = e.touches[0].clientX;
     dragStartOff.current = offsetRef.current;
   }
-
   function onTouchMove(e: React.TouchEvent) {
     if (!dragging.current) return;
-    const dx   = dragStartX.current - e.touches[0].clientX;
+    const dx = dragStartX.current - e.touches[0].clientX;
     const half = halfRef.current;
     if (!half) return;
-    let next = dragStartOff.current + dx;
-    // wrap into [0, half)
-    next = ((next % half) + half) % half;
-    offsetRef.current = next;
+    offsetRef.current = ((dragStartOff.current + dx) % half + half) % half;
   }
+  function onTouchEnd() { dragging.current = false; setIsDragging(false); }
 
-  function onTouchEnd() {
-    dragging.current = false;
-    setIsDragging(false);
-  }
-
-  // ── mouse drag handlers (desktop) ──
   function onMouseDown(e: React.MouseEvent) {
     dragging.current = true;
     setIsDragging(true);
     dragStartX.current   = e.clientX;
     dragStartOff.current = offsetRef.current;
   }
-
   function onMouseMove(e: React.MouseEvent) {
     if (!dragging.current) return;
-    const dx   = dragStartX.current - e.clientX;
+    const dx = dragStartX.current - e.clientX;
     const half = halfRef.current;
     if (!half) return;
-    let next = dragStartOff.current + dx;
-    next = ((next % half) + half) % half;
-    offsetRef.current = next;
+    offsetRef.current = ((dragStartOff.current + dx) % half + half) % half;
   }
-
-  function onMouseUp() {
-    dragging.current = false;
-    setIsDragging(false);
-  }
+  function onMouseUp() { dragging.current = false; setIsDragging(false); }
 
   const nameMain   = APP_NAME.slice(0, -2);
   const nameAccent = APP_NAME.slice(-2);
@@ -160,58 +129,23 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
         WebkitBackdropFilter: "blur(18px)",
       }}
     >
-      {/* Row 1: streak / wordmark / count */}
+      {/* Wordmark row */}
       <div
-        className="flex items-center justify-between px-4"
+        className="flex items-center justify-center"
         style={{
           paddingTop: "calc(env(safe-area-inset-top, 0px) + 10px)",
           paddingBottom: "10px",
         }}
       >
-        {/* Streak — always visible; dims to 0.28 when streak = 0 */}
-        <div className="w-20 flex items-center gap-1.5">
-          <span
-            className="flex items-center gap-1 font-body font-bold"
-            style={{
-              fontSize: "13px",
-              color: "var(--streak)",
-              opacity: streak >= 1 ? 1 : 0.28,
-              transition: "opacity 0.3s ease",
-            }}
-          >
-            <FireIcon />
-            {streak >= 1 ? streak : ""}
-          </span>
-        </div>
-
         <span
           className="font-heading font-bold select-none"
           style={{ fontSize: "19px", color: "var(--text-primary)", letterSpacing: "-0.03em" }}
         >
           {nameMain}<span style={{ color: "var(--accent)" }}>{nameAccent}</span>
         </span>
-
-        <div className="w-20 flex flex-col items-end">
-          {todayCount > 0 && (
-            <>
-              <span
-                className="font-body font-bold"
-                style={{ fontSize: "14px", color: "var(--text-secondary)", lineHeight: "1" }}
-              >
-                {todayCount}
-              </span>
-              <span
-                className="font-body font-semibold uppercase"
-                style={{ fontSize: "8.5px", color: "var(--text-tertiary)", letterSpacing: "0.07em", marginTop: "1px" }}
-              >
-                today
-              </span>
-            </>
-          )}
-        </div>
       </div>
 
-      {/* Row 2: fact ticker — JS-driven scroll, draggable */}
+      {/* Ticker row — JS-driven, draggable */}
       <div
         className="relative"
         style={{
@@ -233,14 +167,9 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
         onTouchEnd={onTouchEnd}
         onTouchCancel={onTouchEnd}
       >
-        {/* Inner strip — transformed by rAF */}
         <div
           ref={innerRef}
-          style={{
-            display: "flex",
-            width: "max-content",
-            willChange: "transform",
-          }}
+          style={{ display: "flex", width: "max-content", willChange: "transform" }}
         >
           {facts.map((fact, i) => (
             <span
@@ -259,7 +188,6 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
           ))}
         </div>
 
-        {/* Drag-to-scroll hint — shown while dragging */}
         {isDragging && (
           <div
             className="absolute inset-y-0 right-0 flex items-center pointer-events-none"
@@ -279,13 +207,5 @@ export default function TopBar({ streak, todayCount }: TopBarProps) {
         )}
       </div>
     </header>
-  );
-}
-
-function FireIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2C9.5 7 14 9 11 14c-1 2-3 3-3 3s.5-2-.5-3.5C6 12 4 10.5 4 8c0-3 2.5-5.5 5-6 0 0-1 3 1 4.5C11.5 7.5 12 2 12 2zM12 22c-3.3 0-6-2.7-6-6 0-2.2 1.5-4.2 3-5.5.5 1 1.5 1.5 1.5 3 0 .8-.5 1.5-.5 1.5s3-1 3-4c1.5 1 3 3 3 5 0 3.3-2.7 6-6 6z" />
-    </svg>
   );
 }
