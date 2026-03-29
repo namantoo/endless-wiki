@@ -4,13 +4,12 @@ import { colorSeedFromTitle } from "@/lib/config/gradients";
 const REST_API   = "https://en.wikipedia.org/api/rest_v1";
 const ACTION_API = "https://en.wikipedia.org/w/api.php";
 
-// Wikipedia API requires a descriptive User-Agent for production use
 const WP_HEADERS = {
   "User-Agent": "EndlessWiki/1.0 (https://endless-wiki-scroll.vercel.app; namanmail4@gmail.com) next.js",
   "Api-User-Agent": "EndlessWiki/1.0",
 };
 
-// Strip HTML tags and decode all HTML entities from Wikipedia display titles
+// Strip HTML tags and decode entities from Wikipedia display titles
 function stripHtml(html: string): string {
   return html
     .replace(/<[^>]+>/g, "")
@@ -23,15 +22,15 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-// Filter out maintenance/administrative categories — anything not meaningful to readers
+// Filter out Wikipedia maintenance/admin categories — meaningless to readers
 const MAINTENANCE_PATTERN =
   /stubs?$|(^(Articles|Pages|CS1|Use |Coordinates|All |Wikipedia|Webarchive|Short |Good |Featured |Spoken |Harv and Sfn|Cleanup|Orphaned|Disputed|Accuracy|Bias|Dead|External links|Living people|Commons category|Commons-inline|Interlanguage link|Redirects|Nocat|Tracking|Template))/i;
 
-// ─── Extract trimming ─────────────────────────────────────────────
+// ─── Extract trimming ────────────────────────────────────────────────────────
 
 function trimExtract(
   text: string,
-  targetWords = 200
+  targetWords = 350
 ): { preview: string; full: string } {
   const full = text.trim();
   const words = full.split(/\s+/);
@@ -48,7 +47,7 @@ function trimExtract(
   return { preview, full };
 }
 
-// Fisher-Yates shuffle — used for category randomness
+// Fisher-Yates shuffle
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -58,7 +57,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// ─── Single article enrichment ────────────────────────────────────
+// ─── REST summary ────────────────────────────────────────────────────────────
 
 interface RawSummary {
   pageid: number;
@@ -84,27 +83,35 @@ async function fetchSummary(title: string): Promise<RawSummary | null> {
   }
 }
 
+// ─── Action API: categories + links + full intro extract ────────────────────
+// All three props in one request — no extra round trips.
+
 interface RawCatLink {
   categories?: Array<{ title: string }>;
   links?: Array<{ ns: number; title: string }>;
+  extract?: string;
 }
 
-async function fetchCategoriesAndLinks(
-  title: string
-): Promise<{ categories: string[]; links: string[] }> {
+async function fetchCategoriesLinksExtract(title: string): Promise<{
+  categories: string[];
+  links: string[];
+  introText: string;
+}> {
   try {
     const params = new URLSearchParams({
       action: "query",
       titles: title,
-      prop: "categories|links",
+      prop: "categories|links|extracts",
       cllimit: "20",
       plnamespace: "0",
       pllimit: "10",
+      exintro: "true",      // intro section only
+      explaintext: "true",  // plain text, no HTML markup
       format: "json",
       origin: "*",
     });
     const res = await fetch(`${ACTION_API}?${params}`, { headers: WP_HEADERS });
-    if (!res.ok) return { categories: [], links: [] };
+    if (!res.ok) return { categories: [], links: [], introText: "" };
     const data = await res.json();
 
     const pages: Record<string, RawCatLink> = data?.query?.pages ?? {};
@@ -120,13 +127,14 @@ async function fetchCategoriesAndLinks(
       .map((l) => l.title)
       .slice(0, 6);
 
-    return { categories, links };
+    const introText = page?.extract?.trim() ?? "";
+
+    return { categories, links, introText };
   } catch {
-    return { categories: [], links: [] };
+    return { categories: [], links: [], introText: "" };
   }
 }
 
-// Build related topics from link titles — no extra API calls needed
 function buildRelatedTopics(linkTitles: string[]): RelatedTopic[] {
   return linkTitles.slice(0, 4).map((t) => ({
     title: t,
@@ -134,17 +142,25 @@ function buildRelatedTopics(linkTitles: string[]): RelatedTopic[] {
   }));
 }
 
+// ─── Article enrichment ──────────────────────────────────────────────────────
+
 async function enrichArticle(title: string): Promise<WikiArticle | null> {
-  const [summary, { categories, links }] = await Promise.all([
+  const [summary, { categories, links, introText }] = await Promise.all([
     fetchSummary(title),
-    fetchCategoriesAndLinks(title),
+    fetchCategoriesLinksExtract(title),
   ]);
 
-  if (!summary || !summary.extract || summary.type === "disambiguation") {
-    return null;
-  }
+  if (!summary || summary.type === "disambiguation") return null;
 
-  const { preview, full } = trimExtract(summary.extract);
+  // Quality filter: skip stubs (too short to be interesting)
+  const rawExtract = summary.extract?.trim() ?? "";
+  if (rawExtract.length < 120) return null;
+
+  // Use the Action API intro if it's richer than the REST summary extract
+  const bestExtract =
+    introText.length > rawExtract.length ? introText : rawExtract;
+
+  const { preview, full } = trimExtract(bestExtract);
   const relatedTopics = buildRelatedTopics(links);
 
   return {
@@ -165,14 +181,25 @@ async function enrichArticle(title: string): Promise<WikiArticle | null> {
   };
 }
 
-// ─── Public API ───────────────────────────────────────────────────
+// ─── Public API ───────────────────────────────────────────────────────────────
 
-/** Fetch N random articles from Wikipedia. */
+/** Fetch a single article by exact Wikipedia title. Used for related deep dive. */
+export async function getArticleByTitle(
+  title: string
+): Promise<WikiArticle | null> {
+  return enrichArticle(title);
+}
+
+/** Fetch N random articles. 40% drawn from Featured articles for quality. */
 export async function getRandomArticles(
   count: number = 5
 ): Promise<WikiArticle[]> {
-  // Request extra to compensate for disambiguation/empty-extract rejections
-  const fetchCount = Math.min(count + 5, 20);
+  // 40% of the time pull from Featured articles — well-written, interesting
+  if (Math.random() < 0.4) {
+    return getArticlesByCategory(["Featured_articles"], count);
+  }
+
+  const fetchCount = Math.min(count + 8, 20);
   const params = new URLSearchParams({
     action: "query",
     list: "random",
@@ -182,7 +209,10 @@ export async function getRandomArticles(
     origin: "*",
   });
 
-  const res = await fetch(`${ACTION_API}?${params}`, { headers: WP_HEADERS, cache: "no-store" });
+  const res = await fetch(`${ACTION_API}?${params}`, {
+    headers: WP_HEADERS,
+    cache: "no-store",
+  });
   const data = await res.json();
   const titles: string[] = (data?.query?.random ?? []).map(
     (p: { title: string }) => p.title
@@ -199,17 +229,15 @@ export async function getRandomArticles(
     .slice(0, count);
 }
 
-/** Fetch N articles from a specific Wikipedia category pool, randomly sampled.
- *  `slugPool` is an array of specific subcategory names — one is picked at
- *  random per call, then a random A-Z start key is applied on top, giving
- *  26 × pool.length distinct entry points into Wikipedia per topic.
+/** Fetch N articles from a pool of specific Wikipedia subcategories.
+ *  One subcategory is picked at random per call + random A-Z start key
+ *  → ~26 × pool.length distinct entry points per topic.
  */
 export async function getArticlesByCategory(
   slugPool: string | string[],
   count: number = 5
 ): Promise<WikiArticle[]> {
   const pool = Array.isArray(slugPool) ? slugPool : [slugPool];
-  // Pick a random subcategory from the pool
   const categorySlug = pool[Math.floor(Math.random() * pool.length)];
 
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -217,37 +245,45 @@ export async function getArticlesByCategory(
 
   const poolSize = Math.min(count * 6, 50);
 
-  async function fetchFromCategory(slug: string, prefix: string): Promise<string[]> {
+  async function fetchFromCategory(
+    slug: string,
+    prefix: string
+  ): Promise<string[]> {
     const params = new URLSearchParams({
       action: "query",
       list: "categorymembers",
       cmtitle: `Category:${slug}`,
       cmnamespace: "0",
-      cmtype: "page",           // articles only — skip subcategory entries
+      cmtype: "page",
       cmlimit: String(poolSize),
       cmsort: "sortkey",
       cmstartsortkeyprefix: prefix,
       format: "json",
       origin: "*",
     });
-    const res = await fetch(`${ACTION_API}?${params}`, { headers: WP_HEADERS, cache: "no-store" });
+    const res = await fetch(`${ACTION_API}?${params}`, {
+      headers: WP_HEADERS,
+      cache: "no-store",
+    });
     const data = await res.json();
-    return (data?.query?.categorymembers ?? []).map((p: { title: string }) => p.title);
+    return (data?.query?.categorymembers ?? []).map(
+      (p: { title: string }) => p.title
+    );
   }
 
   let titles = await fetchFromCategory(categorySlug, randomPrefix);
 
-  // If the random letter window is sparse, try a different letter in the same category
+  // Sparse letter window — try a different letter
   if (titles.length < count) {
-    const fallbackPrefix = alphabet[Math.floor(Math.random() * alphabet.length)];
+    const fallbackPrefix =
+      alphabet[Math.floor(Math.random() * alphabet.length)];
     titles = await fetchFromCategory(categorySlug, fallbackPrefix);
   }
 
-  // Still sparse? Try a different subcategory from the pool
+  // Still sparse — try a different subcategory from the pool
   if (titles.length < count && pool.length > 1) {
-    const fallbackSlug = pool.filter(s => s !== categorySlug)[
-      Math.floor(Math.random() * (pool.length - 1))
-    ];
+    const others = pool.filter((s) => s !== categorySlug);
+    const fallbackSlug = others[Math.floor(Math.random() * others.length)];
     titles = await fetchFromCategory(fallbackSlug, randomPrefix);
   }
 

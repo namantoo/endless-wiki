@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRandomArticles, getArticlesByCategory } from "@/lib/wikipedia";
+import {
+  getRandomArticles,
+  getArticlesByCategory,
+  getArticleByTitle,
+} from "@/lib/wikipedia";
 import { CATEGORIES } from "@/lib/config/categories";
 
-// Force dynamic — this endpoint returns random articles, must never be statically cached
 export const dynamic = "force-dynamic";
-// Give Wikipedia API calls enough time on Vercel
 export const maxDuration = 20;
 
 export async function GET(req: NextRequest) {
@@ -12,13 +14,18 @@ export async function GET(req: NextRequest) {
     Number(req.nextUrl.searchParams.get("count") ?? "5"),
     10
   );
-  const topic = req.nextUrl.searchParams.get("topic"); // null = random
+  const topic = req.nextUrl.searchParams.get("topic");       // category slug
+  const exactTitle = req.nextUrl.searchParams.get("title");  // related deep dive
 
   try {
     let articles;
-    if (topic) {
-      // Look up the pool for this topic slug so the API uses deep subcategories
-      const cat = CATEGORIES.find(c => c.slug === topic);
+
+    if (exactTitle) {
+      // Fetch one specific article by title (related topic deep dive)
+      const article = await getArticleByTitle(decodeURIComponent(exactTitle));
+      articles = article ? [article] : [];
+    } else if (topic) {
+      const cat = CATEGORIES.find((c) => c.slug === topic);
       const pool = cat?.pool ?? [topic];
       articles = await getArticlesByCategory(pool, count);
     } else {

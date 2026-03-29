@@ -9,9 +9,10 @@ import { useBookmarks } from "@/lib/hooks/useBookmarks";
 interface WikiReelProps {
   article: WikiArticle;
   isActive: boolean;
+  onExplore?: (title: string) => void;  // related deep dive
 }
 
-export default function WikiReel({ article, isActive }: WikiReelProps) {
+export default function WikiReel({ article, isActive, onExplore }: WikiReelProps) {
   const [expanded, setExpanded] = useState(false);
   const { toggle, isBookmarked } = useBookmarks();
   const saved = isBookmarked(article.id);
@@ -34,13 +35,36 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
   }, [article, toggle]);
 
   const handleShare = useCallback(async () => {
-    if (navigator.share) {
+    const ogUrl = `/api/og?title=${encodeURIComponent(article.displayTitle)}&desc=${encodeURIComponent(article.description ?? "")}`;
+    const shareText = `${article.displayTitle}${article.description ? `\n${article.description}` : ""}\n\n${article.pageUrl}`;
+
+    // Try sharing as image file (Web Share API level 2)
+    if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        await navigator.share({ title: article.title, url: article.pageUrl });
+        const resp = await fetch(ogUrl);
+        const blob = await resp.blob();
+        const file = new File([blob], "wheels-discovery.png", { type: "image/png" });
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ files: [file], title: article.displayTitle });
+          return;
+        }
+      } catch { /* fall through */ }
+
+      // Fallback: share text + URL
+      try {
+        await navigator.share({
+          title: article.displayTitle,
+          text: shareText,
+          url: article.pageUrl,
+        });
+        return;
       } catch { /* cancelled */ }
-    } else {
-      await navigator.clipboard.writeText(article.pageUrl).catch(() => {});
     }
+
+    // Desktop fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n\nvia Wheels`);
+    } catch { /* ignore */ }
   }, [article]);
 
   const hasMore = article.extractFull.length > article.extract.length;
@@ -54,7 +78,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
         transition: "opacity 0.35s ease",
       }}
     >
-      {/* ── Background ───────────────────────────────────────── */}
+      {/* ── Background ─────────────────────────────────────────── */}
       {article.thumbnail ? (
         <>
           <Image
@@ -80,7 +104,6 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
       ) : (
         <>
           <div className="absolute inset-0" style={{ background: getGradient(article.colorSeed) }} />
-          {/* Dot texture on no-image cards */}
           <div
             className="absolute inset-0"
             style={{
@@ -91,7 +114,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
         </>
       )}
 
-      {/* ── Glass panel — content + actions all in one card ──── */}
+      {/* ── Glass panel ─────────────────────────────────────────── */}
       <div
         className="absolute left-0 right-0 bottom-0"
         style={{
@@ -104,12 +127,8 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 18px)",
         }}
       >
-        {/* Zone 1: category chip (left) + bookmark/share (right) — same row */}
-        <div
-          className="animate-cardReveal flex items-center justify-between"
-          style={{ marginBottom: "10px" }}
-        >
-          {/* Category chip */}
+        {/* Zone 1: category chip + bookmark/share */}
+        <div className="animate-cardReveal flex items-center justify-between" style={{ marginBottom: "10px" }}>
           <div>
             {article.categories[0] ? (
               <span
@@ -127,21 +146,16 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
               >
                 {article.categories[0]}
               </span>
-            ) : (
-              <span />
-            )}
+            ) : <span />}
           </div>
 
-          {/* Bookmark + Share — inside the panel, top-right */}
           <div className="flex items-center gap-2">
             <button
               ref={bookmarkRef}
               onClick={handleBookmark}
               className="flex items-center justify-center active:scale-90 transition-transform"
               style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "9999px",
+                width: "36px", height: "36px", borderRadius: "9999px",
                 background: saved ? "var(--accent)" : "rgba(255,255,255,0.08)",
                 border: saved ? "none" : "1px solid rgba(255,255,255,0.14)",
               }}
@@ -149,14 +163,11 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
             >
               <BookmarkIcon filled={saved} />
             </button>
-
             <button
               onClick={handleShare}
               className="flex items-center justify-center active:scale-90 transition-transform"
               style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "9999px",
+                width: "36px", height: "36px", borderRadius: "9999px",
                 background: "rgba(255,255,255,0.08)",
                 border: "1px solid rgba(255,255,255,0.14)",
               }}
@@ -167,7 +178,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
           </div>
         </div>
 
-        {/* Zone 2: Title + description + extract */}
+        {/* Zone 2: title + description + extract */}
         <div className="animate-cardReveal-d1">
           <h1
             className="font-heading font-bold"
@@ -190,14 +201,10 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
             <p
               className="font-body"
               style={{
-                fontSize: "13px",
-                lineHeight: "1.35",
-                color: "var(--text-secondary)",
-                marginBottom: "10px",
-                display: "-webkit-box",
-                WebkitLineClamp: 1,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
+                fontSize: "13px", lineHeight: "1.35",
+                color: "var(--text-secondary)", marginBottom: "10px",
+                display: "-webkit-box", WebkitLineClamp: 1,
+                WebkitBoxOrient: "vertical", overflow: "hidden",
               }}
             >
               {article.description}
@@ -207,8 +214,7 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
           <p
             className="font-body"
             style={{
-              fontSize: "14px",
-              lineHeight: "1.65",
+              fontSize: "14px", lineHeight: "1.65",
               color: "rgba(255,255,255,0.80)",
               display: expanded ? "block" : "-webkit-box",
               WebkitLineClamp: expanded ? undefined : 3,
@@ -238,40 +244,30 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
               rel="noopener noreferrer"
               className="font-body font-medium inline-flex items-center gap-1 transition-opacity hover:opacity-70"
               style={{
-                fontSize: "11.5px",
-                padding: "4px 11px",
-                borderRadius: "9999px",
+                fontSize: "11.5px", padding: "4px 11px", borderRadius: "9999px",
                 border: "1px solid rgba(255,255,255,0.22)",
-                color: "var(--text-secondary)",
-                whiteSpace: "nowrap",
+                color: "var(--text-secondary)", whiteSpace: "nowrap",
               }}
             >
               Wikipedia <ArrowIcon />
             </a>
 
             {article.relatedTopics.map((topic) => (
-              <a
+              <button
                 key={topic.title}
-                href={topic.pageUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-body font-medium transition-opacity hover:opacity-70"
+                onClick={() => onExplore?.(topic.title)}
+                className="font-body font-medium transition-opacity hover:opacity-70 active:scale-95"
                 style={{
-                  fontSize: "11.5px",
-                  padding: "4px 11px",
-                  borderRadius: "9999px",
+                  fontSize: "11.5px", padding: "4px 11px", borderRadius: "9999px",
                   border: "1px solid rgba(255,255,255,0.12)",
                   background: "rgba(255,255,255,0.05)",
-                  color: "var(--text-tertiary)",
-                  whiteSpace: "nowrap",
-                  maxWidth: "140px",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "block",
+                  color: "var(--text-tertiary)", whiteSpace: "nowrap",
+                  maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis",
+                  cursor: "pointer",
                 }}
               >
                 {topic.title}
-              </a>
+              </button>
             ))}
           </div>
         </div>
@@ -279,8 +275,6 @@ export default function WikiReel({ article, isActive }: WikiReelProps) {
     </div>
   );
 }
-
-// ─── Icons ────────────────────────────────────────────────────────
 
 function BookmarkIcon({ filled }: { filled: boolean }) {
   return (

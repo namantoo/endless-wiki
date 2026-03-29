@@ -1,39 +1,31 @@
 "use client";
 
-import {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-} from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { WikiArticle } from "@/types/wiki";
 import WikiReel from "./WikiReel";
 import SkeletonReel from "./SkeletonReel";
 
-const DOM_CAP = 40;      // max articles in DOM at once
-const TRIM_BATCH = 5;    // how many to remove from front when capping
-const PREFETCH_AHEAD = 2; // prefetch when N articles from the end
+const DOM_CAP       = 40;
+const TRIM_BATCH    = 5;
+const PREFETCH_AHEAD = 2;
 
 interface ReelFeedProps {
   selectedCategory: string | null;
   onActiveIndexChange?: (index: number) => void;
 }
 
-export default function ReelFeed({
-  selectedCategory,
-  onActiveIndexChange,
-}: ReelFeedProps) {
-  const [articles, setArticles] = useState<WikiArticle[]>([]);
+export default function ReelFeed({ selectedCategory, onActiveIndexChange }: ReelFeedProps) {
+  const [articles, setArticles]       = useState<WikiArticle[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]         = useState(true);
   const [fetchingMore, setFetchingMore] = useState(false);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const activeIndexRef = useRef(0); // avoid stale closure in keydown handler
+  const containerRef   = useRef<HTMLDivElement>(null);
+  const observerRef    = useRef<IntersectionObserver | null>(null);
+  const itemRefs       = useRef<(HTMLDivElement | null)[]>([]);
+  const activeIndexRef = useRef(0);
 
-  // ─── Fetch helpers ──────────────────────────────────────────────
+  // ─── Fetch helpers ─────────────────────────────────────────────────
 
   const fetchArticles = useCallback(async (count = 5): Promise<WikiArticle[]> => {
     try {
@@ -48,7 +40,7 @@ export default function ReelFeed({
     }
   }, [selectedCategory]);
 
-  // ─── Initial load / category change ────────────────────────────
+  // ─── Initial load / category change ────────────────────────────────
 
   useEffect(() => {
     setLoading(true);
@@ -61,9 +53,9 @@ export default function ReelFeed({
       setArticles(data);
       setLoading(false);
     });
-  }, [fetchArticles]); // selectedCategory is captured in fetchArticles
+  }, [fetchArticles]);
 
-  // ─── Prefetch + DOM cap ─────────────────────────────────────────
+  // ─── Prefetch + DOM cap ─────────────────────────────────────────────
 
   useEffect(() => {
     if (articles.length === 0 || fetchingMore) return;
@@ -73,10 +65,7 @@ export default function ReelFeed({
     fetchArticles(5).then((more) => {
       setArticles((prev) => {
         const combined = [...prev, ...more];
-        if (combined.length <= DOM_CAP) {
-          return combined;
-        }
-        // Trim oldest articles from front, keep activeIndex in sync
+        if (combined.length <= DOM_CAP) return combined;
         const trimmed = combined.slice(TRIM_BATCH);
         setActiveIndex((ai) => Math.max(0, ai - TRIM_BATCH));
         activeIndexRef.current = Math.max(0, activeIndexRef.current - TRIM_BATCH);
@@ -87,7 +76,34 @@ export default function ReelFeed({
     });
   }, [activeIndex, articles.length, fetchingMore, fetchArticles]);
 
-  // ─── Intersection observer ──────────────────────────────────────
+  // ─── Related deep dive: inject a specific article after current ─────
+
+  const handleExplore = useCallback(async (title: string) => {
+    try {
+      const res = await fetch(`/api/wiki?title=${encodeURIComponent(title)}`);
+      if (!res.ok) return;
+      const data: WikiArticle[] = await res.json();
+      if (!data.length) return;
+
+      const injected = data[0];
+      const insertAt = activeIndexRef.current + 1;
+
+      setArticles((prev) => {
+        // Don't inject a duplicate
+        if (prev.some((a) => a.id === injected.id)) return prev;
+        const next = [...prev];
+        next.splice(insertAt, 0, injected);
+        return next;
+      });
+
+      // Scroll to the injected article after a short delay for DOM to update
+      setTimeout(() => {
+        itemRefs.current[insertAt]?.scrollIntoView({ behavior: "smooth" });
+      }, 80);
+    } catch { /* silent */ }
+  }, []);
+
+  // ─── Intersection observer ──────────────────────────────────────────
 
   useEffect(() => {
     if (observerRef.current) observerRef.current.disconnect();
@@ -115,32 +131,26 @@ export default function ReelFeed({
     return () => observerRef.current?.disconnect();
   }, [articles, onActiveIndexChange]);
 
-  // ─── Keyboard navigation ────────────────────────────────────────
+  // ─── Keyboard navigation ────────────────────────────────────────────
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA") return;
-
       if (e.key === "ArrowDown" || e.key === "j") {
         e.preventDefault();
-        itemRefs.current[activeIndexRef.current + 1]?.scrollIntoView({
-          behavior: "smooth",
-        });
+        itemRefs.current[activeIndexRef.current + 1]?.scrollIntoView({ behavior: "smooth" });
       }
       if (e.key === "ArrowUp" || e.key === "k") {
         e.preventDefault();
-        itemRefs.current[activeIndexRef.current - 1]?.scrollIntoView({
-          behavior: "smooth",
-        });
+        itemRefs.current[activeIndexRef.current - 1]?.scrollIntoView({ behavior: "smooth" });
       }
     };
-
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // ─── Render ─────────────────────────────────────────────────────
+  // ─── Render ─────────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -159,17 +169,18 @@ export default function ReelFeed({
       {articles.map((article, i) => (
         <div
           key={`${article.id}-${i}`}
-          ref={(el) => {
-            itemRefs.current[i] = el;
-          }}
+          ref={(el) => { itemRefs.current[i] = el; }}
           className="snap-start snap-always w-full"
           style={{ height: "100dvh" }}
         >
-          <WikiReel article={article} isActive={i === activeIndex} />
+          <WikiReel
+            article={article}
+            isActive={i === activeIndex}
+            onExplore={handleExplore}
+          />
         </div>
       ))}
 
-      {/* Loading more indicator — sequential pulse dots */}
       {fetchingMore && (
         <div
           className="snap-start snap-always w-full flex items-center justify-center gap-2"
@@ -179,11 +190,8 @@ export default function ReelFeed({
             <div
               key={i}
               style={{
-                width: "4px",
-                height: "4px",
-                borderRadius: "9999px",
-                background: "var(--accent)",
-                opacity: 0.5,
+                width: "4px", height: "4px", borderRadius: "9999px",
+                background: "var(--accent)", opacity: 0.5,
                 animation: `dotPulse 1.2s ease-in-out ${i * 0.15}s infinite`,
               }}
             />
