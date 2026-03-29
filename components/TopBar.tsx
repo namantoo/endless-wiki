@@ -3,40 +3,14 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { APP_NAME } from "@/lib/config/tokens";
 
-// Row 1: wordmark
-// Row 2: scrolling fact ticker — shuffled randomly on each page load
-
-const ALL_FACTS = [
+// A small fallback shown instantly while the API fetch is in flight.
+// Replaced as soon as real facts arrive — usually within ~1s.
+const FALLBACK_FACTS = [
+  "Wikipedia has over 6.7 million articles in English alone",
   "Honey never expires — 3,000-year-old honey found in Egyptian tombs was still edible",
-  "A group of flamingos is called a flamboyance",
-  "Cleopatra lived closer in time to the Moon landing than to the Great Pyramid's construction",
   "Sharks are older than trees — they've existed for over 400 million years",
-  "The word 'nerd' was first coined by Dr. Seuss in 1950",
-  "Wombat poop is cube-shaped — the only known animal to produce cube-shaped waste",
-  "The Eiffel Tower grows up to 15 cm taller in summer due to thermal expansion",
   "A day on Venus is longer than a year on Venus",
   "Octopuses have three hearts, nine brains, and blue blood",
-  "The shortest war in history lasted 38 to 45 minutes — Britain vs Zanzibar, 1896",
-  "There are more possible iterations of a chess game than atoms in the observable universe",
-  "A group of crows is called a murder",
-  "The average person walks the equivalent of five times around the Earth in their lifetime",
-  "Bananas are slightly radioactive due to naturally occurring potassium-40",
-  "Oxford University is older than the Aztec Empire",
-  "The dot over the letters 'i' and 'j' is called a tittle",
-  "Vending machines kill more people per year than sharks",
-  "The smell of rain on dry earth has a name — petrichor",
-  "Scotland's national animal is the unicorn",
-  "A group of owls is called a parliament",
-  "Humans share 50% of their DNA with bananas",
-  "The moon is moving away from Earth at approximately 3.8 cm per year",
-  "Nintendo was founded in 1889 — originally as a playing card company",
-  "There are more stars in the universe than grains of sand on all of Earth's beaches",
-  "Butterflies taste with their feet",
-  "The heart of a blue whale is so large a human could crawl through its arteries",
-  "It rains diamonds on Neptune and Uranus",
-  "A group of porcupines is called a prickle",
-  "The inventor of the frisbee was turned into a frisbee after he died — he requested it",
-  "Cleopatra's reign was closer to the invention of the iPhone than to the construction of the Great Pyramid",
 ];
 
 function shuffle<T>(arr: T[]): T[] {
@@ -48,25 +22,50 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// px per frame at 60 fps → ~24 px/s, leisurely on any device
+// px per frame at 60 fps → ~24 px/s, smooth on any device
 const SCROLL_SPEED = 0.4;
 
 export default function TopBar() {
   const [isDragging, setIsDragging] = useState(false);
+  // Start with fallback, swap in real facts once fetched
+  const [rawFacts, setRawFacts] = useState<string[]>(FALLBACK_FACTS);
 
+  // Fetch truly random facts from our API route on every mount
+  useEffect(() => {
+    fetch("/api/facts?count=30")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: string[] | null) => {
+        if (data && data.length >= 5) {
+          setRawFacts(data);
+        }
+      })
+      .catch(() => { /* keep fallback */ });
+  }, []);
+
+  // Shuffle and duplicate for seamless loop.
+  // Recalculates when rawFacts changes (fallback → real facts swap).
+  const facts = useMemo(() => {
+    const s = shuffle(rawFacts);
+    return [...s, ...s];
+  }, [rawFacts]);
+
+  // ── rAF refs — mutations only, no re-renders ──
   const innerRef     = useRef<HTMLDivElement>(null);
   const offsetRef    = useRef(0);
-  const halfRef      = useRef(0);
+  const halfRef      = useRef(0);   // reset to 0 when facts change so width recalculates
   const pausedRef    = useRef(false);
   const dragging     = useRef(false);
   const dragStartX   = useRef(0);
   const dragStartOff = useRef(0);
 
-  const facts = useMemo(() => {
-    const s = shuffle(ALL_FACTS);
-    return [...s, ...s];
-  }, []);
+  // When facts swap in, the inner div's width changes — reset halfRef so
+  // the loop recalculates on the next tick instead of looping at wrong position.
+  useEffect(() => {
+    halfRef.current = 0;
+    offsetRef.current = 0;
+  }, [facts]);
 
+  // rAF loop — runs once, reads refs on every frame
   useEffect(() => {
     const el = innerRef.current;
     if (!el) return;
@@ -87,32 +86,30 @@ export default function TopBar() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // ── touch handlers ──
   function onTouchStart(e: React.TouchEvent) {
-    dragging.current = true;
-    setIsDragging(true);
-    dragStartX.current   = e.touches[0].clientX;
+    dragging.current = true; setIsDragging(true);
+    dragStartX.current = e.touches[0].clientX;
     dragStartOff.current = offsetRef.current;
   }
   function onTouchMove(e: React.TouchEvent) {
     if (!dragging.current) return;
+    const half = halfRef.current; if (!half) return;
     const dx = dragStartX.current - e.touches[0].clientX;
-    const half = halfRef.current;
-    if (!half) return;
     offsetRef.current = ((dragStartOff.current + dx) % half + half) % half;
   }
   function onTouchEnd() { dragging.current = false; setIsDragging(false); }
 
+  // ── mouse handlers ──
   function onMouseDown(e: React.MouseEvent) {
-    dragging.current = true;
-    setIsDragging(true);
-    dragStartX.current   = e.clientX;
+    dragging.current = true; setIsDragging(true);
+    dragStartX.current = e.clientX;
     dragStartOff.current = offsetRef.current;
   }
   function onMouseMove(e: React.MouseEvent) {
     if (!dragging.current) return;
+    const half = halfRef.current; if (!half) return;
     const dx = dragStartX.current - e.clientX;
-    const half = halfRef.current;
-    if (!half) return;
     offsetRef.current = ((dragStartOff.current + dx) % half + half) % half;
   }
   function onMouseUp() { dragging.current = false; setIsDragging(false); }
@@ -145,7 +142,7 @@ export default function TopBar() {
         </span>
       </div>
 
-      {/* Ticker row — JS-driven, draggable */}
+      {/* Ticker row — JS-driven scroll, draggable */}
       <div
         className="relative"
         style={{
