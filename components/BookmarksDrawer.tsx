@@ -59,9 +59,9 @@ export default function BookmarksDrawer({ open, onClose }: BookmarksDrawerProps)
           bottom: 0,
           zIndex: 101,
           maxHeight: "80dvh",
-          background: "#161616",
+          background: "var(--drawer-bg)",
           borderRadius: "22px 22px 0 0",
-          borderTop: "1px solid rgba(255,255,255,0.10)",
+          borderTop: "1px solid var(--drawer-border)",
           transform: open ? "translateY(0)" : "translateY(100%)",
           transition: "transform 0.32s cubic-bezier(0.32, 0.72, 0, 1)",
           display: "flex",
@@ -87,7 +87,7 @@ export default function BookmarksDrawer({ open, onClose }: BookmarksDrawerProps)
               width: "36px",
               height: "4px",
               borderRadius: "2px",
-              background: "rgba(255,255,255,0.18)",
+              background: "var(--on-surface-faint)",
             }}
           />
 
@@ -98,7 +98,7 @@ export default function BookmarksDrawer({ open, onClose }: BookmarksDrawerProps)
               alignItems: "center",
               justifyContent: "space-between",
               paddingBottom: "12px",
-              borderBottom: "1px solid rgba(255,255,255,0.07)",
+              borderBottom: "1px solid var(--drawer-divider)",
             }}
           >
             <span
@@ -106,7 +106,7 @@ export default function BookmarksDrawer({ open, onClose }: BookmarksDrawerProps)
                 fontFamily: "'Space Grotesk', system-ui, sans-serif",
                 fontSize: "17px",
                 fontWeight: 700,
-                color: "rgba(255,255,255,0.94)",
+                color: "var(--on-surface)",
                 letterSpacing: "-0.02em",
               }}
             >
@@ -117,7 +117,7 @@ export default function BookmarksDrawer({ open, onClose }: BookmarksDrawerProps)
                     marginLeft: "8px",
                     fontSize: "12px",
                     fontWeight: 600,
-                    color: "rgba(255,255,255,0.32)",
+                    color: "var(--on-surface-low)",
                   }}
                 >
                   {bookmarks.length}
@@ -131,7 +131,7 @@ export default function BookmarksDrawer({ open, onClose }: BookmarksDrawerProps)
                 width: "32px",
                 height: "32px",
                 borderRadius: "9999px",
-                background: "rgba(255,255,255,0.07)",
+                background: "var(--btn-bg)",
                 border: "none",
                 cursor: "pointer",
                 display: "flex",
@@ -140,7 +140,7 @@ export default function BookmarksDrawer({ open, onClose }: BookmarksDrawerProps)
               }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="rgba(255,255,255,0.60)" strokeWidth="2.5"
+                stroke="var(--btn-icon)" strokeWidth="2.5"
                 strokeLinecap="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
@@ -170,20 +170,20 @@ export default function BookmarksDrawer({ open, onClose }: BookmarksDrawerProps)
               }}
             >
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
-                stroke="rgba(255,255,255,0.18)" strokeWidth="1.5"
+                stroke="var(--on-surface-faint)" strokeWidth="1.5"
                 strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
               </svg>
               <p style={{
                 fontFamily: "'Inter', system-ui, sans-serif",
                 fontSize: "14px",
-                color: "rgba(255,255,255,0.32)",
+                color: "var(--on-surface-low)",
                 textAlign: "center",
                 margin: 0,
                 lineHeight: 1.5,
               }}>
                 No saved articles yet.<br />
-                Tap <span style={{ color: "rgba(255,255,255,0.50)" }}>☆</span> on any card to save it here.
+                Tap <span style={{ color: "var(--on-surface-med)" }}>☆</span> on any card to save it here.
               </p>
             </div>
           ) : (
@@ -211,7 +211,7 @@ function BookmarkRow({
         alignItems: "center",
         gap: "14px",
         padding: "12px 20px",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        borderBottom: "1px solid var(--drawer-divider)",
       }}
     >
       {/* Thumbnail */}
@@ -225,7 +225,7 @@ function BookmarkRow({
             borderRadius: "10px",
             objectFit: "cover",
             flexShrink: 0,
-            background: "#202020",
+            background: "var(--surface-2)",
           }}
         />
       ) : (
@@ -258,7 +258,7 @@ function BookmarkRow({
             fontFamily: "'Space Grotesk', system-ui, sans-serif",
             fontSize: "15px",
             fontWeight: 700,
-            color: "rgba(255,255,255,0.90)",
+            color: "var(--on-surface)",
             letterSpacing: "-0.01em",
             textDecoration: "none",
             display: "block",
@@ -274,7 +274,7 @@ function BookmarkRow({
             style={{
               fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: "12px",
-              color: "rgba(255,255,255,0.38)",
+              color: "var(--on-surface-low)",
               margin: "2px 0 0",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -294,7 +294,7 @@ function BookmarkRow({
           width: "30px",
           height: "30px",
           borderRadius: "9999px",
-          background: "rgba(255,255,255,0.06)",
+          background: "var(--btn-bg)",
           border: "none",
           cursor: "pointer",
           display: "flex",
@@ -304,7 +304,7 @@ function BookmarkRow({
         aria-label="Remove bookmark"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-          stroke="rgba(255,255,255,0.40)" strokeWidth="2.5" strokeLinecap="round">
+          stroke="var(--on-surface-low)" strokeWidth="2.5" strokeLinecap="round">
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
         </svg>

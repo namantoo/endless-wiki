@@ -21,6 +21,7 @@
 
   /* Accent — electric lime */
   --accent:        #C6FF47;
+  --accent-fg:     #0D0D0D;  /* text/icon on top of accent-coloured bg */
   --accent-light:  #D4FF70;
   --accent-dim:    rgba(198, 255, 71, 0.12);
   --accent-border: rgba(198, 255, 71, 0.38);
@@ -32,6 +33,67 @@
   /* Structural */
   --border:        rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.16);
+
+  /* ── Component surfaces (used by TopBar, drawers, glass panel) ── */
+  --topbar-bg:       rgba(13,  13,  13,  0.78);
+  --glass-bg:        rgba(13,  13,  13,  0.84);
+  --glass-border:    rgba(255, 255, 255, 0.12);
+  --drawer-bg:       #161616;
+  --drawer-border:   rgba(255, 255, 255, 0.10);
+  --drawer-divider:  rgba(255, 255, 255, 0.07);
+
+  /* ── Tonal alpha scale (white-on-dark) ── */
+  --on-surface:       rgba(255, 255, 255, 0.90);
+  --on-surface-med:   rgba(255, 255, 255, 0.60);
+  --on-surface-low:   rgba(255, 255, 255, 0.38);
+  --on-surface-faint: rgba(255, 255, 255, 0.18);
+
+  /* ── Interactive elements ── */
+  --btn-bg:      rgba(255, 255, 255, 0.07);
+  --btn-border:  rgba(255, 255, 255, 0.12);
+  --btn-icon:    rgba(255, 255, 255, 0.68);
+  --chip-border: rgba(255, 255, 255, 0.14);
+}
+
+/* ── Light mode overrides ─────────────────────────────────────── */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --surface-0: #F3F3F3;
+  --surface-1: #EBEBEB;
+  --surface-2: #E2E2E2;
+  --surface-3: #D6D6D6;
+
+  --text-primary:   rgba(0, 0, 0, 0.88);
+  --text-secondary: rgba(0, 0, 0, 0.52);
+  --text-tertiary:  rgba(0, 0, 0, 0.28);
+
+  /* Olive green — readable on light bg, distinct from white bg */
+  --accent:        #4D7800;
+  --accent-fg:     #FFFFFF;
+  --accent-light:  #5E9200;
+  --accent-dim:    rgba(77, 120, 0, 0.10);
+  --accent-border: rgba(77, 120, 0, 0.35);
+
+  --border:        rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.16);
+
+  --topbar-bg:       rgba(243, 243, 243, 0.88);
+  --glass-bg:        rgba(252, 252, 252, 0.94);
+  --glass-border:    rgba(0, 0, 0, 0.08);
+  --drawer-bg:       #F0F0F0;
+  --drawer-border:   rgba(0, 0, 0, 0.08);
+  --drawer-divider:  rgba(0, 0, 0, 0.06);
+
+  --on-surface:       rgba(0, 0, 0, 0.88);
+  --on-surface-med:   rgba(0, 0, 0, 0.55);
+  --on-surface-low:   rgba(0, 0, 0, 0.36);
+  --on-surface-faint: rgba(0, 0, 0, 0.14);
+
+  --btn-bg:      rgba(0, 0, 0, 0.05);
+  --btn-border:  rgba(0, 0, 0, 0.12);
+  --btn-icon:    rgba(0, 0, 0, 0.55);
+  --chip-border: rgba(0, 0, 0, 0.14);
 }
 
 /* Expose tokens to Tailwind utilities */

@@ -76,11 +76,11 @@ export default function InstallBanner() {
     >
       <div
         style={{
-          background: "rgba(20,20,20,0.97)",
+          background: "var(--drawer-bg)",
           backdropFilter: "blur(32px)",
           WebkitBackdropFilter: "blur(32px)",
           borderRadius: "18px",
-          border: "1px solid rgba(255,255,255,0.11)",
+          border: "1px solid var(--drawer-border)",
           padding: "13px 12px 13px 14px",
           display: "flex", alignItems: "center", gap: "11px",
           boxShadow: "0 8px 40px rgba(0,0,0,0.55)",
@@ -89,7 +89,7 @@ export default function InstallBanner() {
         {/* Mini app icon */}
         <div style={{
           width: "42px", height: "42px", borderRadius: "11px", flexShrink: 0,
-          background: "#111", border: "1px solid rgba(255,255,255,0.09)",
+          background: "var(--surface-1)", border: "1px solid var(--btn-border)",
           display: "flex", alignItems: "center", justifyContent: "center",
           fontFamily: "'Space Grotesk', system-ui, sans-serif",
           fontSize: "17px", fontWeight: 800, letterSpacing: "-0.05em",
@@ -104,13 +104,13 @@ export default function InstallBanner() {
           <p style={{
             fontFamily: "'Space Grotesk', system-ui, sans-serif",
             fontSize: "13px", fontWeight: 700,
-            color: "rgba(255,255,255,0.92)", margin: 0, lineHeight: 1.2,
+            color: "var(--on-surface)", margin: 0, lineHeight: 1.2,
           }}>
             Add Wheels to Home Screen
           </p>
           <p style={{
             fontFamily: "'Inter', system-ui, sans-serif",
-            fontSize: "11.5px", color: "rgba(255,255,255,0.38)",
+            fontSize: "11.5px", color: "var(--on-surface-low)",
             margin: "3px 0 0", lineHeight: 1.35,
           }}>
             {platform === "ios"
@@ -143,7 +143,7 @@ export default function InstallBanner() {
           aria-label="Dismiss"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="rgba(255,255,255,0.28)" strokeWidth="2.5" strokeLinecap="round">
+            stroke="var(--on-surface-faint)" strokeWidth="2.5" strokeLinecap="round">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>

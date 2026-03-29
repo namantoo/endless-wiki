@@ -43,9 +43,9 @@ export default function CategoryFilterBar({
                 letterSpacing: "0.04em",
                 border: isActive
                   ? "1.5px solid var(--accent)"
-                  : "1px solid rgba(255,255,255,0.12)",
+                  : "1px solid var(--chip-border)",
                 background: isActive ? "var(--accent)" : "transparent",
-                color: isActive ? "#0D0D0D" : "var(--text-tertiary)",
+                color: isActive ? "var(--accent-fg)" : "var(--text-tertiary)",
                 fontWeight: isActive ? 700 : 500,
               }}
             >

@@ -106,9 +106,9 @@ export default function SearchDrawer({ open, onClose, onSelect }: SearchDrawerPr
         style={{
           position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 101,
           maxHeight: "88dvh",
-          background: "#161616",
+          background: "var(--drawer-bg)",
           borderRadius: "22px 22px 0 0",
-          borderTop: "1px solid rgba(255,255,255,0.10)",
+          borderTop: "1px solid var(--drawer-border)",
           transform: open ? "translateY(0)" : "translateY(100%)",
           transition: "transform 0.30s cubic-bezier(0.32, 0.72, 0, 1)",
           display: "flex", flexDirection: "column",
@@ -117,7 +117,7 @@ export default function SearchDrawer({ open, onClose, onSelect }: SearchDrawerPr
       >
         {/* Pull handle */}
         <div style={{ display: "flex", justifyContent: "center", paddingTop: "12px", paddingBottom: "4px" }}>
-          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(255,255,255,0.18)" }} />
+          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "var(--on-surface-faint)" }} />
         </div>
 
         {/* Search input */}
@@ -125,7 +125,7 @@ export default function SearchDrawer({ open, onClose, onSelect }: SearchDrawerPr
           style={{
             display: "flex", alignItems: "center", gap: "12px",
             padding: "10px 16px 12px",
-            borderBottom: "1px solid rgba(255,255,255,0.07)",
+            borderBottom: "1px solid var(--drawer-divider)",
           }}
         >
           <SearchIcon />
@@ -138,8 +138,8 @@ export default function SearchDrawer({ open, onClose, onSelect }: SearchDrawerPr
               flex: 1, background: "transparent", border: "none", outline: "none",
               fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: "17px", fontWeight: 500,
-              color: "rgba(255,255,255,0.90)",
-              caretColor: "#C6FF47",
+              color: "var(--on-surface)",
+              caretColor: "var(--accent)",
             }}
           />
           {query && (
@@ -148,7 +148,7 @@ export default function SearchDrawer({ open, onClose, onSelect }: SearchDrawerPr
               style={{ background: "none", border: "none", cursor: "pointer", padding: "4px" }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="rgba(255,255,255,0.38)" strokeWidth="2.5" strokeLinecap="round">
+                stroke="var(--on-surface-low)" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
@@ -161,7 +161,7 @@ export default function SearchDrawer({ open, onClose, onSelect }: SearchDrawerPr
             <div style={{ display: "flex", justifyContent: "center", padding: "32px" }}>
               <div style={{
                 width: "20px", height: "20px", borderRadius: "50%",
-                border: "2px solid rgba(255,255,255,0.10)",
+                border: "2px solid var(--btn-border)",
                 borderTopColor: "#C6FF47",
                 animation: "spin 0.7s linear infinite",
               }} />
@@ -172,7 +172,7 @@ export default function SearchDrawer({ open, onClose, onSelect }: SearchDrawerPr
             <div style={{
               padding: "40px 24px", textAlign: "center",
               fontFamily: "'Inter', system-ui, sans-serif",
-              fontSize: "14px", color: "rgba(255,255,255,0.32)",
+              fontSize: "14px", color: "var(--on-surface-low)",
             }}>
               No results for &ldquo;{query}&rdquo;
             </div>
@@ -182,7 +182,7 @@ export default function SearchDrawer({ open, onClose, onSelect }: SearchDrawerPr
             <div style={{
               padding: "32px 24px", textAlign: "center",
               fontFamily: "'Inter', system-ui, sans-serif",
-              fontSize: "14px", color: "rgba(255,255,255,0.28)", lineHeight: 1.6,
+              fontSize: "14px", color: "var(--on-surface-low)", lineHeight: 1.6,
             }}>
               Search any topic —<br />quantum physics, ancient Rome, anything.
             </div>
@@ -196,21 +196,21 @@ export default function SearchDrawer({ open, onClose, onSelect }: SearchDrawerPr
                 display: "flex", flexDirection: "column", alignItems: "flex-start",
                 width: "100%", padding: "13px 20px", gap: "3px",
                 background: "none", border: "none",
-                borderBottom: "1px solid rgba(255,255,255,0.05)",
+                borderBottom: "1px solid var(--drawer-divider)",
                 cursor: "pointer", textAlign: "left",
               }}
             >
               <span style={{
                 fontFamily: "'Space Grotesk', system-ui, sans-serif",
                 fontSize: "15px", fontWeight: 700,
-                color: "rgba(255,255,255,0.90)", letterSpacing: "-0.01em",
+                color: "var(--on-surface)", letterSpacing: "-0.01em",
               }}>
                 {r.title}
               </span>
               {r.description && (
                 <span style={{
                   fontFamily: "'Inter', system-ui, sans-serif",
-                  fontSize: "12px", color: "rgba(255,255,255,0.38)", lineHeight: 1.4,
+                  fontSize: "12px", color: "var(--on-surface-low)", lineHeight: 1.4,
                 }}>
                   {r.description}
                 </span>
@@ -230,7 +230,7 @@ export default function SearchDrawer({ open, onClose, onSelect }: SearchDrawerPr
 function SearchIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-      stroke="rgba(255,255,255,0.40)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      stroke="var(--on-surface-low)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="11" cy="11" r="8" />
       <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>

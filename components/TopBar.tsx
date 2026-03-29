@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import { APP_NAME } from "@/lib/config/tokens";
+import { useTheme } from "@/lib/hooks/useTheme";
 
 const FALLBACK_FACTS = [
   "Wikipedia has over 6.7 million articles in English alone",
@@ -30,6 +31,7 @@ interface TopBarProps {
 export default function TopBar({ onBookmarksOpen, onSearchOpen }: TopBarProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [rawFacts, setRawFacts]     = useState<string[]>(FALLBACK_FACTS);
+  const { theme, toggle }           = useTheme();
 
   useEffect(() => {
     fetch("/api/facts?count=30")
@@ -107,7 +109,7 @@ export default function TopBar({ onBookmarksOpen, onSearchOpen }: TopBarProps) {
     <header
       className="fixed top-0 inset-x-0 z-50"
       style={{
-        background: "rgba(13,13,13,0.75)",
+        background: "var(--topbar-bg)",
         backdropFilter: "blur(18px)",
         WebkitBackdropFilter: "blur(18px)",
       }}
@@ -126,13 +128,12 @@ export default function TopBar({ onBookmarksOpen, onSearchOpen }: TopBarProps) {
           className="flex items-center justify-center active:scale-90 transition-transform"
           style={{
             width: "36px", height: "36px", borderRadius: "9999px",
-            background: "rgba(255,255,255,0.07)",
-            border: "1px solid rgba(255,255,255,0.10)",
+            background: "var(--btn-bg)", border: "1px solid var(--btn-border)",
           }}
           aria-label="Search Wikipedia"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-            stroke="rgba(255,255,255,0.70)" strokeWidth="2.5"
+            stroke="var(--btn-icon)" strokeWidth="2.5"
             strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -147,23 +148,35 @@ export default function TopBar({ onBookmarksOpen, onSearchOpen }: TopBarProps) {
           {nameMain}<span style={{ color: "var(--accent)" }}>{nameAccent}</span>
         </span>
 
-        {/* Bookmarks button — top right */}
-        <button
-          onClick={onBookmarksOpen}
-          className="flex items-center justify-center active:scale-90 transition-transform"
-          style={{
-            width: "36px", height: "36px", borderRadius: "9999px",
-            background: "rgba(255,255,255,0.07)",
-            border: "1px solid rgba(255,255,255,0.10)",
-          }}
-          aria-label="Open saved articles"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="rgba(255,255,255,0.70)" strokeWidth="2"
-            strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-          </svg>
-        </button>
+        {/* Right cluster: theme toggle + bookmarks */}
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={toggle}
+            className="flex items-center justify-center active:scale-90 transition-transform"
+            style={{
+              width: "36px", height: "36px", borderRadius: "9999px",
+              background: "var(--btn-bg)", border: "1px solid var(--btn-border)",
+            }}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+          </button>
+          <button
+            onClick={onBookmarksOpen}
+            className="flex items-center justify-center active:scale-90 transition-transform"
+            style={{
+              width: "36px", height: "36px", borderRadius: "9999px",
+              background: "var(--btn-bg)", border: "1px solid var(--btn-border)",
+            }}
+            aria-label="Open saved articles"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="var(--btn-icon)" strokeWidth="2"
+              strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Ticker row */}
@@ -195,7 +208,7 @@ export default function TopBar({ onBookmarksOpen, onSearchOpen }: TopBarProps) {
               className="font-body font-bold uppercase"
               style={{
                 fontSize: "10px", letterSpacing: "0.07em",
-                color: "#0D0D0D", whiteSpace: "nowrap", paddingRight: "52px",
+                color: "var(--accent-fg)", whiteSpace: "nowrap", paddingRight: "52px",
               }}
             >
               ★ {fact}
@@ -221,5 +234,27 @@ export default function TopBar({ onBookmarksOpen, onSearchOpen }: TopBarProps) {
         )}
       </div>
     </header>
+  );
+}
+
+function SunIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+      stroke="var(--btn-icon)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+      stroke="var(--btn-icon)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
   );
 }

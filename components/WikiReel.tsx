@@ -121,11 +121,11 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
       <div
         className="absolute left-0 right-0 bottom-0"
         style={{
-          background: "rgba(13,13,13,0.80)",
+          background: "var(--glass-bg)",
           backdropFilter: "blur(28px)",
           WebkitBackdropFilter: "blur(28px)",
           borderRadius: "22px 22px 0 0",
-          borderTop: "1px solid rgba(255,255,255,0.12)",
+          borderTop: "1px solid var(--glass-border)",
           padding: "18px 20px",
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 18px)",
         }}
@@ -142,7 +142,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
                   padding: "3px 10px",
                   borderRadius: "9999px",
                   background: "var(--accent)",
-                  color: "#0D0D0D",
+                  color: "var(--accent-fg)",
                   display: "inline-block",
                   lineHeight: "1.6",
                 }}
@@ -159,8 +159,8 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
               className="flex items-center justify-center active:scale-90 transition-transform"
               style={{
                 width: "36px", height: "36px", borderRadius: "9999px",
-                background: saved ? "var(--accent)" : "rgba(255,255,255,0.08)",
-                border: saved ? "none" : "1px solid rgba(255,255,255,0.14)",
+                background: saved ? "var(--accent)" : "var(--btn-bg)",
+                border: saved ? "none" : "1px solid var(--btn-border)",
               }}
               aria-label={saved ? "Remove bookmark" : "Bookmark article"}
             >
@@ -171,8 +171,8 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
               className="flex items-center justify-center active:scale-90 transition-transform"
               style={{
                 width: "36px", height: "36px", borderRadius: "9999px",
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.14)",
+                background: "var(--btn-bg)",
+                border: "1px solid var(--btn-border)",
               }}
               aria-label="Share article"
             >
@@ -218,7 +218,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
             className="font-body"
             style={{
               fontSize: "14px", lineHeight: "1.65",
-              color: "rgba(255,255,255,0.80)",
+              color: "var(--on-surface)",
               display: "-webkit-box",
               WebkitLineClamp: 3,
               WebkitBoxOrient: "vertical",
@@ -248,7 +248,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
               className="font-body font-medium inline-flex items-center gap-1 transition-opacity hover:opacity-70"
               style={{
                 fontSize: "11.5px", padding: "4px 11px", borderRadius: "9999px",
-                border: "1px solid rgba(255,255,255,0.22)",
+                border: "1px solid var(--btn-border)",
                 color: "var(--text-secondary)", whiteSpace: "nowrap",
               }}
             >
@@ -262,8 +262,8 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
                 className="font-body font-medium transition-opacity hover:opacity-70 active:scale-95"
                 style={{
                   fontSize: "11.5px", padding: "4px 11px", borderRadius: "9999px",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid var(--chip-border)",
+                  background: "var(--btn-bg)",
                   color: "var(--text-tertiary)", whiteSpace: "nowrap",
                   maxWidth: "140px", overflow: "hidden", textOverflow: "ellipsis",
                   cursor: "pointer",
@@ -296,11 +296,11 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
         style={{
           position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 201,
           height: "88dvh",
-          background: "rgba(16,16,16,0.97)",
+          background: "var(--drawer-bg)",
           backdropFilter: "blur(32px)",
           WebkitBackdropFilter: "blur(32px)",
           borderRadius: "22px 22px 0 0",
-          borderTop: "1px solid rgba(255,255,255,0.10)",
+          borderTop: "1px solid var(--drawer-border)",
           display: "flex", flexDirection: "column",
           transform: expanded ? "translateY(0)" : "translateY(100%)",
           transition: "transform 0.32s cubic-bezier(0.32, 0.72, 0, 1)",
@@ -309,14 +309,14 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
       >
         {/* Drag handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 6px" }}>
-          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(255,255,255,0.18)" }} />
+          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "var(--on-surface-faint)" }} />
         </div>
 
         {/* Header: title + close */}
         <div style={{
           display: "flex", alignItems: "flex-start", justifyContent: "space-between",
           padding: "4px 20px 12px",
-          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          borderBottom: "1px solid var(--drawer-divider)",
           gap: "12px",
         }}>
           <div style={{ flex: 1 }}>
@@ -332,7 +332,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
               fontFamily: "'Space Grotesk', system-ui, sans-serif",
               fontSize: "19px", fontWeight: 700,
               letterSpacing: "-0.02em", lineHeight: "1.15",
-              color: "rgba(255,255,255,0.95)",
+              color: "var(--on-surface)",
             }}>
               {article.displayTitle}
             </h2>
@@ -342,14 +342,14 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
             style={{
               flexShrink: 0, width: "32px", height: "32px",
               borderRadius: "9999px", border: "none",
-              background: "rgba(255,255,255,0.08)",
+              background: "var(--btn-bg)",
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer", marginTop: "2px",
             }}
             aria-label="Close reader"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="rgba(255,255,255,0.55)" strokeWidth="2.5" strokeLinecap="round">
+              stroke="var(--btn-icon)" strokeWidth="2.5" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
@@ -365,7 +365,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
             <p style={{
               fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: "14px", fontWeight: 500,
-              color: "rgba(255,255,255,0.45)",
+              color: "var(--on-surface-low)",
               lineHeight: "1.4", marginBottom: "16px",
               fontStyle: "italic",
             }}>
@@ -375,7 +375,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
           <p style={{
             fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: "15px", lineHeight: "1.75",
-            color: "rgba(255,255,255,0.82)",
+            color: "var(--on-surface)",
           }}>
             {article.extractFull}
           </p>
@@ -405,8 +405,8 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
 function BookmarkIcon({ filled }: { filled: boolean }) {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24"
-      fill={filled ? "#0D0D0D" : "none"}
-      stroke={filled ? "#0D0D0D" : "rgba(255,255,255,0.75)"}
+      fill={filled ? "var(--accent-fg)" : "none"}
+      stroke={filled ? "var(--accent-fg)" : "var(--btn-icon)"}
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
     </svg>
@@ -416,7 +416,7 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
 function ShareIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24"
-      fill="none" stroke="rgba(255,255,255,0.75)"
+      fill="none" stroke="var(--btn-icon)"
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
       <polyline points="16 6 12 2 8 6" />
