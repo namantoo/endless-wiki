@@ -214,51 +214,31 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
             </p>
           )}
 
-          {expanded ? (
-            <div
-              style={{
-                maxHeight: "28vh",
-                overflowY: "auto",
-                WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"],
-                maskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
-                WebkitMaskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
-                paddingRight: "4px",
-              }}
-            >
-              <p
-                className="font-body"
-                style={{ fontSize: "14px", lineHeight: "1.65", color: "rgba(255,255,255,0.80)" }}
-              >
-                {article.extractFull}
-              </p>
-            </div>
-          ) : (
-            <p
-              className="font-body"
-              style={{
-                fontSize: "14px", lineHeight: "1.65",
-                color: "rgba(255,255,255,0.80)",
-                display: "-webkit-box",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
-            >
-              {article.extract}
-            </p>
-          )}
+          <p
+            className="font-body"
+            style={{
+              fontSize: "14px", lineHeight: "1.65",
+              color: "rgba(255,255,255,0.80)",
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {article.extract}
+          </p>
           {hasMore && (
             <button
-              onClick={() => setExpanded((e) => !e)}
+              onClick={() => { haptic.light(); setExpanded(true); }}
               className="font-body font-semibold transition-opacity hover:opacity-70"
               style={{ fontSize: "12px", color: "var(--accent)", marginTop: "4px", display: "block" }}
             >
-              {expanded ? "Show less" : "Read more ›"}
+              Read more ›
             </button>
           )}
         </div>
 
-        {/* Zone 3: Wikipedia link + related pills */}
+        {/* Zone 3: Wikipedia link + related pills (hidden when reader open) */}
         <div className="animate-cardReveal-d2" style={{ marginTop: "14px" }}>
           <div className="flex items-center gap-2 flex-wrap">
             <a
@@ -293,6 +273,129 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
               </button>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* ── Full-screen reader sheet ─────────────────────────────── */}
+      {/* Backdrop */}
+      <div
+        onClick={() => { haptic.light(); setExpanded(false); }}
+        style={{
+          position: "absolute", inset: 0, zIndex: 10,
+          background: "rgba(0,0,0,0.55)",
+          backdropFilter: "blur(4px)",
+          WebkitBackdropFilter: "blur(4px)",
+          opacity: expanded ? 1 : 0,
+          pointerEvents: expanded ? "auto" : "none",
+          transition: "opacity 0.25s ease",
+        }}
+      />
+
+      {/* Sheet */}
+      <div
+        style={{
+          position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 11,
+          height: "88dvh",
+          background: "rgba(16,16,16,0.97)",
+          backdropFilter: "blur(32px)",
+          WebkitBackdropFilter: "blur(32px)",
+          borderRadius: "22px 22px 0 0",
+          borderTop: "1px solid rgba(255,255,255,0.10)",
+          display: "flex", flexDirection: "column",
+          transform: expanded ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 0.32s cubic-bezier(0.32, 0.72, 0, 1)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
+      >
+        {/* Drag handle */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 6px" }}>
+          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "rgba(255,255,255,0.18)" }} />
+        </div>
+
+        {/* Header: title + close */}
+        <div style={{
+          display: "flex", alignItems: "flex-start", justifyContent: "space-between",
+          padding: "4px 20px 12px",
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          gap: "12px",
+        }}>
+          <div style={{ flex: 1 }}>
+            <p style={{
+              fontFamily: "'Inter', system-ui, sans-serif",
+              fontSize: "11px", fontWeight: 700,
+              letterSpacing: "0.08em", textTransform: "uppercase",
+              color: "var(--accent)", marginBottom: "4px",
+            }}>
+              {article.categories[0] ?? "Article"}
+            </p>
+            <h2 style={{
+              fontFamily: "'Space Grotesk', system-ui, sans-serif",
+              fontSize: "19px", fontWeight: 700,
+              letterSpacing: "-0.02em", lineHeight: "1.15",
+              color: "rgba(255,255,255,0.95)",
+            }}>
+              {article.displayTitle}
+            </h2>
+          </div>
+          <button
+            onClick={() => { haptic.light(); setExpanded(false); }}
+            style={{
+              flexShrink: 0, width: "32px", height: "32px",
+              borderRadius: "9999px", border: "none",
+              background: "rgba(255,255,255,0.08)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", marginTop: "2px",
+            }}
+            aria-label="Close reader"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="rgba(255,255,255,0.55)" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Scrollable body */}
+        <div style={{
+          flex: 1, overflowY: "auto",
+          WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"],
+          padding: "20px 20px 32px",
+        }}>
+          {article.description && (
+            <p style={{
+              fontFamily: "'Inter', system-ui, sans-serif",
+              fontSize: "14px", fontWeight: 500,
+              color: "rgba(255,255,255,0.45)",
+              lineHeight: "1.4", marginBottom: "16px",
+              fontStyle: "italic",
+            }}>
+              {article.description}
+            </p>
+          )}
+          <p style={{
+            fontFamily: "'Inter', system-ui, sans-serif",
+            fontSize: "15px", lineHeight: "1.75",
+            color: "rgba(255,255,255,0.82)",
+          }}>
+            {article.extractFull}
+          </p>
+
+          {/* Wikipedia link at bottom */}
+          <a
+            href={article.pageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "6px",
+              marginTop: "28px",
+              fontFamily: "'Inter', system-ui, sans-serif",
+              fontSize: "13px", fontWeight: 500,
+              color: "var(--accent)",
+              textDecoration: "none",
+            }}
+          >
+            Read full article on Wikipedia <ArrowIcon />
+          </a>
         </div>
       </div>
     </div>
