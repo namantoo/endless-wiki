@@ -28,21 +28,24 @@ const MAINTENANCE_PATTERN =
 
 // ─── Extract trimming ────────────────────────────────────────────────────────
 
-function trimExtract(
-  text: string,
-  targetWords = 350
-): { preview: string; full: string } {
+// preview: ~120 words shown in the card (always truncated so "Read more" appears)
+// full: complete intro text shown when expanded
+const PREVIEW_WORDS = 120;
+
+function trimExtract(text: string): { preview: string; full: string } {
   const full = text.trim();
   const words = full.split(/\s+/);
-  if (words.length <= targetWords) return { preview: full, full };
 
-  const rough = words.slice(0, targetWords + 20).join(" ");
-  const cutoff = targetWords * 6;
-  const sentenceEnd = rough.lastIndexOf(". ", cutoff);
+  // Always build a preview capped at PREVIEW_WORDS so "Read more" shows
+  // on any article with more than a couple of sentences.
+  if (words.length <= PREVIEW_WORDS) return { preview: full, full };
+
+  const rough = words.slice(0, PREVIEW_WORDS + 15).join(" ");
+  const sentenceEnd = rough.lastIndexOf(". ", PREVIEW_WORDS * 6);
   const preview =
-    sentenceEnd > 0
+    sentenceEnd > 20
       ? rough.slice(0, sentenceEnd + 1)
-      : words.slice(0, targetWords).join(" ") + "…";
+      : words.slice(0, PREVIEW_WORDS).join(" ") + "…";
 
   return { preview, full };
 }

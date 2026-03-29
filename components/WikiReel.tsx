@@ -35,7 +35,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
   }, [article, toggle]);
 
   const handleShare = useCallback(async () => {
-    const ogUrl = `/api/og?title=${encodeURIComponent(article.displayTitle)}&desc=${encodeURIComponent(article.description ?? "")}`;
+    const ogUrl = `/api/og?title=${encodeURIComponent(article.displayTitle)}&desc=${encodeURIComponent(article.description ?? "")}&extract=${encodeURIComponent(article.extract ?? "")}`;
     const shareText = `${article.displayTitle}${article.description ? `\n${article.description}` : ""}\n\n${article.pageUrl}`;
 
     // Try sharing as image file (Web Share API level 2)
