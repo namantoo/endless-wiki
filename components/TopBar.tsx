@@ -24,9 +24,10 @@ const SCROLL_SPEED = 0.4;
 
 interface TopBarProps {
   onBookmarksOpen: () => void;
+  onSearchOpen: () => void;
 }
 
-export default function TopBar({ onBookmarksOpen }: TopBarProps) {
+export default function TopBar({ onBookmarksOpen, onSearchOpen }: TopBarProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [rawFacts, setRawFacts]     = useState<string[]>(FALLBACK_FACTS);
 
@@ -119,8 +120,24 @@ export default function TopBar({ onBookmarksOpen }: TopBarProps) {
           paddingBottom: "10px",
         }}
       >
-        {/* Left spacer */}
-        <div style={{ width: "36px" }} />
+        {/* Search button — left */}
+        <button
+          onClick={onSearchOpen}
+          className="flex items-center justify-center active:scale-90 transition-transform"
+          style={{
+            width: "36px", height: "36px", borderRadius: "9999px",
+            background: "rgba(255,255,255,0.07)",
+            border: "1px solid rgba(255,255,255,0.10)",
+          }}
+          aria-label="Search Wikipedia"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="rgba(255,255,255,0.70)" strokeWidth="2.5"
+            strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </button>
 
         {/* Wordmark — centred */}
         <span

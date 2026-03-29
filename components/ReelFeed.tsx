@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from "react";
 import { WikiArticle } from "@/types/wiki";
 import WikiReel from "./WikiReel";
 import SkeletonReel from "./SkeletonReel";
+import { useHaptic } from "@/lib/hooks/useHaptic";
+
+export interface ReelFeedHandle {
+  explore: (title: string) => void;
+}
 
 const DOM_CAP       = 40;
 const TRIM_BATCH    = 5;
@@ -14,11 +19,15 @@ interface ReelFeedProps {
   onActiveIndexChange?: (index: number) => void;
 }
 
-export default function ReelFeed({ selectedCategory, onActiveIndexChange }: ReelFeedProps) {
+const ReelFeed = forwardRef<ReelFeedHandle, ReelFeedProps>(function ReelFeed(
+  { selectedCategory, onActiveIndexChange }: ReelFeedProps,
+  ref
+) {
   const [articles, setArticles]       = useState<WikiArticle[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading]         = useState(true);
   const [fetchingMore, setFetchingMore] = useState(false);
+  const haptic = useHaptic();
 
   const containerRef   = useRef<HTMLDivElement>(null);
   const observerRef    = useRef<IntersectionObserver | null>(null);
@@ -103,6 +112,10 @@ export default function ReelFeed({ selectedCategory, onActiveIndexChange }: Reel
     } catch { /* silent */ }
   }, []);
 
+  // ─── Expose explore() to parent via ref ────────────────────────────
+
+  useImperativeHandle(ref, () => ({ explore: handleExplore }), [handleExplore]);
+
   // ─── Intersection observer ──────────────────────────────────────────
 
   useEffect(() => {
@@ -117,6 +130,7 @@ export default function ReelFeed({ selectedCategory, onActiveIndexChange }: Reel
               setActiveIndex(idx);
               activeIndexRef.current = idx;
               onActiveIndexChange?.(idx);
+              haptic.snap(); // tactile pulse on card snap
             }
           }
         }
@@ -200,4 +214,6 @@ export default function ReelFeed({ selectedCategory, onActiveIndexChange }: Reel
       )}
     </div>
   );
-}
+});
+
+export default ReelFeed;

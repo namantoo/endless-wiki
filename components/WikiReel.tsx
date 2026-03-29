@@ -5,6 +5,7 @@ import Image from "next/image";
 import { WikiArticle } from "@/types/wiki";
 import { getGradient } from "@/lib/config/gradients";
 import { useBookmarks } from "@/lib/hooks/useBookmarks";
+import { useHaptic } from "@/lib/hooks/useHaptic";
 
 interface WikiReelProps {
   article: WikiArticle;
@@ -17,6 +18,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
   const { toggle, isBookmarked } = useBookmarks();
   const saved = isBookmarked(article.id);
   const bookmarkRef = useRef<HTMLButtonElement>(null);
+  const haptic = useHaptic();
 
   const handleBookmark = useCallback(() => {
     toggle({
@@ -26,6 +28,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
       thumbnail: article.thumbnail?.source,
       pageUrl: article.pageUrl,
     });
+    haptic.medium(); // confirmation pulse on save/unsave
     const el = bookmarkRef.current;
     if (el) {
       el.classList.remove("animate-bookmarkPulse");
@@ -255,7 +258,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
             {article.relatedTopics.map((topic) => (
               <button
                 key={topic.title}
-                onClick={() => onExplore?.(topic.title)}
+                onClick={() => { haptic.light(); onExplore?.(topic.title); }}
                 className="font-body font-medium transition-opacity hover:opacity-70 active:scale-95"
                 style={{
                   fontSize: "11.5px", padding: "4px 11px", borderRadius: "9999px",
