@@ -145,7 +145,7 @@ export default function TopBar({ onBookmarksOpen, onSearchOpen }: TopBarProps) {
           className="font-heading font-bold select-none"
           style={{ fontSize: "19px", color: "var(--text-primary)", letterSpacing: "-0.03em" }}
         >
-          {nameMain}<span style={{ color: "var(--accent)" }}>{nameAccent}</span>
+          {nameMain}<span style={{ color: "var(--accent-text)" }}>{nameAccent}</span>
         </span>
 
         {/* Right cluster: theme toggle + bookmarks */}

@@ -1,62 +1,58 @@
 @import "tailwindcss";
 
-/* ─── Base — "Editorial Pop" palette ────────────────────────────── */
+/* ─── Design tokens ──────────────────────────────────────────────── */
 :root {
   color-scheme: dark;
 
-  /* Typography */
   --font-heading: 'Space Grotesk', system-ui, sans-serif;
   --font-body:    'Inter', system-ui, sans-serif;
 
-  /* Surfaces — pure blacks */
+  /* Surfaces */
   --surface-0: #0D0D0D;
   --surface-1: #161616;
   --surface-2: #202020;
   --surface-3: #2B2B2B;
 
-  /* Text — pure whites */
+  /* Text */
   --text-primary:   rgba(255, 255, 255, 0.94);
   --text-secondary: rgba(255, 255, 255, 0.58);
   --text-tertiary:  rgba(255, 255, 255, 0.32);
 
   /* Accent — electric lime */
-  --accent:        #C6FF47;
-  --accent-fg:     #0D0D0D;  /* text/icon on top of accent-coloured bg */
+  --accent:        #C6FF47;           /* always lime: chips, ticker, buttons */
+  --accent-text:   #C6FF47;           /* lime on dark bg — readable */
+  --accent-fg:     #0D0D0D;           /* text ON a lime background */
   --accent-light:  #D4FF70;
   --accent-dim:    rgba(198, 255, 71, 0.12);
   --accent-border: rgba(198, 255, 71, 0.38);
 
-  /* Streak — vivid orange, distinct from lime */
   --streak:     #FF9F47;
   --streak-dim: rgba(255, 159, 71, 0.14);
 
-  /* Structural */
   --border:        rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.16);
 
-  /* ── Component surfaces (used by TopBar, drawers, glass panel) ── */
-  --topbar-bg:       rgba(13,  13,  13,  0.78);
-  --glass-bg:        rgba(13,  13,  13,  0.84);
-  --glass-border:    rgba(255, 255, 255, 0.12);
-  --drawer-bg:       #161616;
-  --drawer-border:   rgba(255, 255, 255, 0.10);
-  --drawer-divider:  rgba(255, 255, 255, 0.07);
+  /* Component surfaces */
+  --topbar-bg:      rgba(13, 13, 13, 0.78);
+  --glass-bg:       rgba(13, 13, 13, 0.84);
+  --glass-border:   rgba(255, 255, 255, 0.12);
+  --drawer-bg:      #161616;
+  --drawer-border:  rgba(255, 255, 255, 0.10);
+  --drawer-divider: rgba(255, 255, 255, 0.07);
 
-  /* ── Tonal alpha scale (white-on-dark) ── */
+  /* Tonal alpha scale */
   --on-surface:       rgba(255, 255, 255, 0.90);
   --on-surface-med:   rgba(255, 255, 255, 0.60);
   --on-surface-low:   rgba(255, 255, 255, 0.38);
   --on-surface-faint: rgba(255, 255, 255, 0.18);
 
-  /* ── Interactive elements ── */
+  /* Interactive */
   --btn-bg:      rgba(255, 255, 255, 0.07);
   --btn-border:  rgba(255, 255, 255, 0.12);
   --btn-icon:    rgba(255, 255, 255, 0.68);
   --chip-border: rgba(255, 255, 255, 0.14);
-}
 
-/* ── Card gradients (fallback bg when article has no photo) ──────── */
-:root {
+  /* Card gradients — near-black warm tones, subtle variation */
   --card-gradient-0: linear-gradient(160deg, #1e1410 0%, #140e0a 60%, #0A0A08 100%);
   --card-gradient-1: linear-gradient(160deg, #161a0e 0%, #10130a 60%, #0A0A08 100%);
   --card-gradient-2: linear-gradient(160deg, #1a1610 0%, #12100c 60%, #0A0A08 100%);
@@ -66,11 +62,10 @@
   --dot-color:       rgba(255, 255, 255, 0.07);
 }
 
-/* ── Light mode overrides ─────────────────────────────────────── */
+/* ── Light mode ───────────────────────────────────────────────────── */
 [data-theme="light"] {
   color-scheme: light;
 
-  /* Pure white surfaces */
   --surface-0: #FFFFFF;
   --surface-1: #F5F5F5;
   --surface-2: #EBEBEB;
@@ -80,22 +75,24 @@
   --text-secondary: rgba(0, 0, 0, 0.52);
   --text-tertiary:  rgba(0, 0, 0, 0.30);
 
-  /* Electric indigo — bold, cool, ~8:1 contrast on white */
-  --accent:        #4338CA;
-  --accent-fg:     #FFFFFF;
-  --accent-light:  #5A4FDB;
-  --accent-dim:    rgba(67, 56, 202, 0.10);
-  --accent-border: rgba(67, 56, 202, 0.35);
+  /* Lime stays for chip/ticker backgrounds — brand identity.
+     accent-text switches to near-black so text on white reads cleanly. */
+  --accent:        #C6FF47;
+  --accent-text:   #0D0D0D;
+  --accent-fg:     #0D0D0D;
+  --accent-light:  #D4FF70;
+  --accent-dim:    rgba(198, 255, 71, 0.14);
+  --accent-border: rgba(0, 0, 0, 0.20);
 
   --border:        rgba(0, 0, 0, 0.08);
   --border-strong: rgba(0, 0, 0, 0.16);
 
-  --topbar-bg:       rgba(255, 255, 255, 0.88);
-  --glass-bg:        rgba(255, 255, 255, 0.96);
-  --glass-border:    rgba(0, 0, 0, 0.07);
-  --drawer-bg:       #F5F5F5;
-  --drawer-border:   rgba(0, 0, 0, 0.07);
-  --drawer-divider:  rgba(0, 0, 0, 0.06);
+  --topbar-bg:      rgba(255, 255, 255, 0.88);
+  --glass-bg:       rgba(255, 255, 255, 0.96);
+  --glass-border:   rgba(0, 0, 0, 0.07);
+  --drawer-bg:      #F5F5F5;
+  --drawer-border:  rgba(0, 0, 0, 0.07);
+  --drawer-divider: rgba(0, 0, 0, 0.06);
 
   --on-surface:       rgba(0, 0, 0, 0.88);
   --on-surface-med:   rgba(0, 0, 0, 0.55);
@@ -107,14 +104,14 @@
   --btn-icon:    rgba(0, 0, 0, 0.52);
   --chip-border: rgba(0, 0, 0, 0.12);
 
-  /* Editorial mid-tone card gradients — rich, photographic feel in light mode */
-  --card-gradient-0: linear-gradient(160deg, #C97848 0%, #B5623A 60%, #9E5028 100%);
-  --card-gradient-1: linear-gradient(160deg, #4A9E8C 0%, #358878 60%, #247265 100%);
-  --card-gradient-2: linear-gradient(160deg, #7B6AAF 0%, #635498 60%, #4E4082 100%);
-  --card-gradient-3: linear-gradient(160deg, #C89040 0%, #B47C2E 60%, #9C681C 100%);
-  --card-gradient-4: linear-gradient(160deg, #4A88C4 0%, #3572AE 60%, #245E98 100%);
-  --card-gradient-5: linear-gradient(160deg, #9C7850 0%, #886438 60%, #745024 100%);
-  --dot-color:       rgba(0, 0, 0, 0.10);
+  /* Near-white card gradients — subtle warm/cool variations, mirrors dark mode approach */
+  --card-gradient-0: linear-gradient(160deg, #F2EDE8 0%, #EAE5E0 60%, #E5E0DA 100%);
+  --card-gradient-1: linear-gradient(160deg, #E8EDF2 0%, #E0E5EA 60%, #DAE0E5 100%);
+  --card-gradient-2: linear-gradient(160deg, #EDE8F2 0%, #E5E0EA 60%, #E0DAE5 100%);
+  --card-gradient-3: linear-gradient(160deg, #F2EBE5 0%, #EAE3DD 60%, #E5DDD7 100%);
+  --card-gradient-4: linear-gradient(160deg, #E5ECF2 0%, #DDE4EA 60%, #D7DFE5 100%);
+  --card-gradient-5: linear-gradient(160deg, #EFE9E5 0%, #E7E1DD 60%, #E2DBD7 100%);
+  --dot-color:       rgba(0, 0, 0, 0.08);
 }
 
 /* Expose tokens to Tailwind utilities */

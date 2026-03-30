@@ -230,7 +230,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
             <button
               onClick={() => { haptic.light(); setExpanded(true); }}
               className="font-body font-semibold transition-opacity hover:opacity-70"
-              style={{ fontSize: "12px", color: "var(--accent)", marginTop: "4px", display: "block" }}
+              style={{ fontSize: "12px", color: "var(--accent-text)", marginTop: "4px", display: "block" }}
             >
               Read more ›
             </button>
@@ -323,7 +323,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
               fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: "11px", fontWeight: 700,
               letterSpacing: "0.08em", textTransform: "uppercase",
-              color: "var(--accent)", marginBottom: "4px",
+              color: "var(--accent-text)", marginBottom: "4px",
             }}>
               {article.categories[0] ?? "Article"}
             </p>
@@ -389,7 +389,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
               marginTop: "28px",
               fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: "13px", fontWeight: 500,
-              color: "var(--accent)",
+              color: "var(--accent-text)",
               textDecoration: "none",
             }}
           >
