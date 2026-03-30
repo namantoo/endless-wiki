@@ -55,45 +55,66 @@
   --chip-border: rgba(255, 255, 255, 0.14);
 }
 
+/* ── Card gradients (fallback bg when article has no photo) ──────── */
+:root {
+  --card-gradient-0: linear-gradient(160deg, #1e1410 0%, #140e0a 60%, #0A0A08 100%);
+  --card-gradient-1: linear-gradient(160deg, #161a0e 0%, #10130a 60%, #0A0A08 100%);
+  --card-gradient-2: linear-gradient(160deg, #1a1610 0%, #12100c 60%, #0A0A08 100%);
+  --card-gradient-3: linear-gradient(160deg, #1e1412 0%, #15100e 60%, #0A0A08 100%);
+  --card-gradient-4: linear-gradient(160deg, #1a1810 0%, #13110c 60%, #0A0A08 100%);
+  --card-gradient-5: linear-gradient(160deg, #1c1a14 0%, #14130e 60%, #0A0A08 100%);
+  --dot-color:       rgba(255, 255, 255, 0.07);
+}
+
 /* ── Light mode overrides ─────────────────────────────────────── */
 [data-theme="light"] {
   color-scheme: light;
 
-  --surface-0: #F3F3F3;
-  --surface-1: #EBEBEB;
-  --surface-2: #E2E2E2;
-  --surface-3: #D6D6D6;
+  /* Pure white surfaces */
+  --surface-0: #FFFFFF;
+  --surface-1: #F5F5F5;
+  --surface-2: #EBEBEB;
+  --surface-3: #E0E0E0;
 
   --text-primary:   rgba(0, 0, 0, 0.88);
   --text-secondary: rgba(0, 0, 0, 0.52);
-  --text-tertiary:  rgba(0, 0, 0, 0.28);
+  --text-tertiary:  rgba(0, 0, 0, 0.30);
 
-  /* Olive green — readable on light bg, distinct from white bg */
-  --accent:        #4D7800;
+  /* Electric indigo — bold, cool, ~8:1 contrast on white */
+  --accent:        #4338CA;
   --accent-fg:     #FFFFFF;
-  --accent-light:  #5E9200;
-  --accent-dim:    rgba(77, 120, 0, 0.10);
-  --accent-border: rgba(77, 120, 0, 0.35);
+  --accent-light:  #5A4FDB;
+  --accent-dim:    rgba(67, 56, 202, 0.10);
+  --accent-border: rgba(67, 56, 202, 0.35);
 
   --border:        rgba(0, 0, 0, 0.08);
   --border-strong: rgba(0, 0, 0, 0.16);
 
-  --topbar-bg:       rgba(243, 243, 243, 0.88);
-  --glass-bg:        rgba(252, 252, 252, 0.94);
-  --glass-border:    rgba(0, 0, 0, 0.08);
-  --drawer-bg:       #F0F0F0;
-  --drawer-border:   rgba(0, 0, 0, 0.08);
+  --topbar-bg:       rgba(255, 255, 255, 0.88);
+  --glass-bg:        rgba(255, 255, 255, 0.96);
+  --glass-border:    rgba(0, 0, 0, 0.07);
+  --drawer-bg:       #F5F5F5;
+  --drawer-border:   rgba(0, 0, 0, 0.07);
   --drawer-divider:  rgba(0, 0, 0, 0.06);
 
   --on-surface:       rgba(0, 0, 0, 0.88);
   --on-surface-med:   rgba(0, 0, 0, 0.55);
   --on-surface-low:   rgba(0, 0, 0, 0.36);
-  --on-surface-faint: rgba(0, 0, 0, 0.14);
+  --on-surface-faint: rgba(0, 0, 0, 0.12);
 
   --btn-bg:      rgba(0, 0, 0, 0.05);
-  --btn-border:  rgba(0, 0, 0, 0.12);
-  --btn-icon:    rgba(0, 0, 0, 0.55);
-  --chip-border: rgba(0, 0, 0, 0.14);
+  --btn-border:  rgba(0, 0, 0, 0.10);
+  --btn-icon:    rgba(0, 0, 0, 0.52);
+  --chip-border: rgba(0, 0, 0, 0.12);
+
+  /* Editorial mid-tone card gradients — rich, photographic feel in light mode */
+  --card-gradient-0: linear-gradient(160deg, #C97848 0%, #B5623A 60%, #9E5028 100%);
+  --card-gradient-1: linear-gradient(160deg, #4A9E8C 0%, #358878 60%, #247265 100%);
+  --card-gradient-2: linear-gradient(160deg, #7B6AAF 0%, #635498 60%, #4E4082 100%);
+  --card-gradient-3: linear-gradient(160deg, #C89040 0%, #B47C2E 60%, #9C681C 100%);
+  --card-gradient-4: linear-gradient(160deg, #4A88C4 0%, #3572AE 60%, #245E98 100%);
+  --card-gradient-5: linear-gradient(160deg, #9C7850 0%, #886438 60%, #745024 100%);
+  --dot-color:       rgba(0, 0, 0, 0.10);
 }
 
 /* Expose tokens to Tailwind utilities */

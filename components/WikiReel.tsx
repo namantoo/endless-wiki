@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef } from "react";
 import Image from "next/image";
 import { WikiArticle } from "@/types/wiki";
-import { getGradient } from "@/lib/config/gradients";
 import { useBookmarks } from "@/lib/hooks/useBookmarks";
 import { useHaptic } from "@/lib/hooks/useHaptic";
 
@@ -106,11 +105,11 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
         </>
       ) : (
         <>
-          <div className="absolute inset-0" style={{ background: getGradient(article.colorSeed) }} />
+          <div className="absolute inset-0" style={{ background: `var(--card-gradient-${article.colorSeed})` }} />
           <div
             className="absolute inset-0"
             style={{
-              backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
+              backgroundImage: "radial-gradient(circle, var(--dot-color) 1px, transparent 1px)",
               backgroundSize: "22px 22px",
             }}
           />
