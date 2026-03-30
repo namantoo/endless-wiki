@@ -116,7 +116,7 @@ export default function TopBar({ onBookmarksOpen, onSearchOpen }: TopBarProps) {
     >
       {/* Wordmark row */}
       <div
-        className="flex items-center justify-between px-4"
+        className="relative flex items-center px-4"
         style={{
           paddingTop: "calc(env(safe-area-inset-top, 0px) + 10px)",
           paddingBottom: "10px",
@@ -140,16 +140,20 @@ export default function TopBar({ onBookmarksOpen, onSearchOpen }: TopBarProps) {
           </svg>
         </button>
 
-        {/* Wordmark — centred */}
+        {/* Wordmark — absolutely centred so button count on each side doesn't matter */}
         <span
-          className="font-heading font-bold select-none"
-          style={{ fontSize: "19px", color: "var(--text-primary)", letterSpacing: "-0.03em" }}
+          className="font-heading font-bold select-none pointer-events-none"
+          style={{
+            position: "absolute", left: "50%", transform: "translateX(-50%)",
+            fontSize: "19px", color: "var(--text-primary)", letterSpacing: "-0.03em",
+            whiteSpace: "nowrap",
+          }}
         >
-          {nameMain}<span style={{ color: "var(--accent-text)" }}>{nameAccent}</span>
+          {nameMain}<span style={{ color: theme === "light" ? "rgba(0,0,0,0.35)" : "var(--accent)" }}>{nameAccent}</span>
         </span>
 
         {/* Right cluster: theme toggle + bookmarks */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 ml-auto">
           <button
             onClick={toggle}
             className="flex items-center justify-center active:scale-90 transition-transform"
