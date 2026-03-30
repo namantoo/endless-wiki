@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
         {/* Reads saved theme before first paint — prevents white flash on dark pref */}
-        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('wheels_theme');if(!t)t=window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}` }} />
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('wheels_theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}` }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

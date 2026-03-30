@@ -105,7 +105,7 @@ export default function WikiReel({ article, isActive, onExplore }: WikiReelProps
         </>
       ) : (
         <>
-          <div className="absolute inset-0" style={{ background: `var(--card-gradient-${article.colorSeed})` }} />
+          <div className="absolute inset-0" style={{ background: "var(--card-bg)" }} />
           <div
             className="absolute inset-0"
             style={{

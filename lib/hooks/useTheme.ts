@@ -10,10 +10,8 @@ export function useTheme() {
 
   useEffect(() => {
     const saved = localStorage.getItem(KEY) as Theme | null;
-    const system: Theme = window.matchMedia("(prefers-color-scheme: light)").matches
-      ? "light"
-      : "dark";
-    const initial = saved ?? system;
+    // Always default to dark — only respect saved preference, not system pref
+    const initial = saved ?? "dark";
     document.documentElement.setAttribute("data-theme", initial);
     setTheme(initial);
   }, []);

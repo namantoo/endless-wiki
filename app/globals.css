@@ -52,14 +52,9 @@
   --btn-icon:    rgba(255, 255, 255, 0.68);
   --chip-border: rgba(255, 255, 255, 0.14);
 
-  /* Card gradients — near-black warm tones, subtle variation */
-  --card-gradient-0: linear-gradient(160deg, #1e1410 0%, #140e0a 60%, #0A0A08 100%);
-  --card-gradient-1: linear-gradient(160deg, #161a0e 0%, #10130a 60%, #0A0A08 100%);
-  --card-gradient-2: linear-gradient(160deg, #1a1610 0%, #12100c 60%, #0A0A08 100%);
-  --card-gradient-3: linear-gradient(160deg, #1e1412 0%, #15100e 60%, #0A0A08 100%);
-  --card-gradient-4: linear-gradient(160deg, #1a1810 0%, #13110c 60%, #0A0A08 100%);
-  --card-gradient-5: linear-gradient(160deg, #1c1a14 0%, #14130e 60%, #0A0A08 100%);
-  --dot-color:       rgba(255, 255, 255, 0.07);
+  /* Card background — one consistent tone per mode, no per-article variation */
+  --card-bg:   linear-gradient(160deg, #1a1510 0%, #12100c 60%, #0A0A08 100%);
+  --dot-color: rgba(255, 255, 255, 0.07);
 }
 
 /* ── Light mode ───────────────────────────────────────────────────── */
@@ -104,14 +99,8 @@
   --btn-icon:    rgba(0, 0, 0, 0.52);
   --chip-border: rgba(0, 0, 0, 0.12);
 
-  /* Near-white card gradients — subtle warm/cool variations, mirrors dark mode approach */
-  --card-gradient-0: linear-gradient(160deg, #F2EDE8 0%, #EAE5E0 60%, #E5E0DA 100%);
-  --card-gradient-1: linear-gradient(160deg, #E8EDF2 0%, #E0E5EA 60%, #DAE0E5 100%);
-  --card-gradient-2: linear-gradient(160deg, #EDE8F2 0%, #E5E0EA 60%, #E0DAE5 100%);
-  --card-gradient-3: linear-gradient(160deg, #F2EBE5 0%, #EAE3DD 60%, #E5DDD7 100%);
-  --card-gradient-4: linear-gradient(160deg, #E5ECF2 0%, #DDE4EA 60%, #D7DFE5 100%);
-  --card-gradient-5: linear-gradient(160deg, #EFE9E5 0%, #E7E1DD 60%, #E2DBD7 100%);
-  --dot-color:       rgba(0, 0, 0, 0.08);
+  --card-bg:   linear-gradient(160deg, #F0EDE8 0%, #EAE7E2 60%, #E5E2DC 100%);
+  --dot-color: rgba(0, 0, 0, 0.08);
 }
 
 /* Expose tokens to Tailwind utilities */

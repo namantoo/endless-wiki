@@ -114,15 +114,19 @@ export default function TopBar({ onBookmarksOpen, onSearchOpen }: TopBarProps) {
         WebkitBackdropFilter: "blur(18px)",
       }}
     >
-      {/* Wordmark row */}
+      {/* Wordmark row — 3-column grid: left | center | right
+          guarantees the wordmark is always exactly centered on any screen */}
       <div
-        className="relative flex items-center px-4"
         style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
+          alignItems: "center",
+          padding: "0 16px",
           paddingTop: "calc(env(safe-area-inset-top, 0px) + 10px)",
           paddingBottom: "10px",
         }}
       >
-        {/* Search button — left */}
+        {/* Col 1 — search */}
         <button
           onClick={onSearchOpen}
           className="flex items-center justify-center active:scale-90 transition-transform"
@@ -140,20 +144,16 @@ export default function TopBar({ onBookmarksOpen, onSearchOpen }: TopBarProps) {
           </svg>
         </button>
 
-        {/* Wordmark — absolutely centred so button count on each side doesn't matter */}
+        {/* Col 2 — wordmark, always screen-centered */}
         <span
-          className="font-heading font-bold select-none pointer-events-none"
-          style={{
-            position: "absolute", left: "50%", transform: "translateX(-50%)",
-            fontSize: "19px", color: "var(--text-primary)", letterSpacing: "-0.03em",
-            whiteSpace: "nowrap",
-          }}
+          className="font-heading font-bold select-none"
+          style={{ fontSize: "19px", color: "var(--text-primary)", letterSpacing: "-0.03em", whiteSpace: "nowrap" }}
         >
           {nameMain}<span style={{ color: theme === "light" ? "rgba(0,0,0,0.35)" : "var(--accent)" }}>{nameAccent}</span>
         </span>
 
-        {/* Right cluster: theme toggle + bookmarks */}
-        <div className="flex items-center gap-1.5 ml-auto">
+        {/* Col 3 — theme toggle + bookmarks, pushed to the right */}
+        <div className="flex items-center gap-1.5 justify-end">
           <button
             onClick={toggle}
             className="flex items-center justify-center active:scale-90 transition-transform"
